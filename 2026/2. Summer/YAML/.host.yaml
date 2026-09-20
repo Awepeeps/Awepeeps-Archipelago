@@ -16,7 +16,7 @@ server_options:
   # Allows for clients to log on and manage the server.  If this is null, no remote administration is possible.
   server_password: null
   # Disallow !getitem
-  disable_item_cheat: false
+  disable_item_cheat: true
   # Client hint system
   # Points given to a player for each acquired item in their world
   location_check_points: 1
