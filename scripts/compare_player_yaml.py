@@ -55,7 +55,21 @@ def comparable(data: dict[str, Any], ignored: set[str]) -> dict[str, Any]:
 
 
 def format_data(data: dict[str, Any]) -> list[str]:
-    return json.dumps(data, indent=2, sort_keys=True, ensure_ascii=True).splitlines()
+    def sort_mappings(value: Any) -> Any:
+        if isinstance(value, dict):
+            return {
+                key: sort_mappings(item)
+                for key, item in sorted(
+                    value.items(), key=lambda entry: (type(entry[0]).__name__, str(entry[0]))
+                )
+            }
+        if isinstance(value, list):
+            return [sort_mappings(item) for item in value]
+        return value
+
+    return json.dumps(
+        sort_mappings(data), indent=2, sort_keys=False, ensure_ascii=True
+    ).splitlines()
 
 
 def main() -> int:
