@@ -5,7 +5,7 @@
 ## Session Links
 
 - **Google Sheet**: [https://docs.google.com/spreadsheets/d/1IlNYQDSLKqZUsS2J3TWNT6ruRYM5FtXTUhhjQ3Qtxc4/edit?usp=sharing](https://docs.google.com/spreadsheets/d/1IlNYQDSLKqZUsS2J3TWNT6ruRYM5FtXTUhhjQ3Qtxc4/edit?usp=sharing)
-- **Archipelago Room**: [Link TBD](https://archipelago.gg/room/)
+- **Archipelago Room**: [https://archipelago.gg/room/SGKIdNzlQ2iGcX73IV9d7g](https://archipelago.gg/room/SGKIdNzlQ2iGcX73IV9d7g)
 - **YAML Configurations**: [YAML/](YAML/)
 - **APWorld Files**: [APWorld/](APWorld/) ([Sekiro](APWorld/sekiro.apworld), [Pokemon Crystal](APWorld/pokemon_crystal.apworld), [Ori WotW](APWorld/ori_wotw.apworld), [Baldur's Gate 3 - ToT](APWorld/bg3tot.apworld))
 - **Secrets and Spoilers**: [.secrets/](.secrets/)
@@ -37,7 +37,7 @@
 ## Notes
 
 - Fall session generation plans to use a new test session based on updated player-provided info before the official start date.
-- Generate this season from the repository inputs with `python scripts/generate_session.py --season "2026/3. Fall" --archipelago "C:\ProgramData\Archipelago" --dry-run`. Review all six playable players. Remove `--dry-run` only when the game setup and APWorld installation are ready. Output defaults to the ignored `2026/3. Fall/.secrets/hidden/<run-id>/` directory, with a date-only run ID when `--run-id` is omitted. Check both hidden and revealed run folders before relying on that default; use a unique explicit `--run-id` for a repeated or named run.
+- Generate this season from the repository inputs with `python scripts/generate_session.py --season "2026/3. Fall" --archipelago "C:\ProgramData\Archipelago" --dry-run`. Review all six playable players plus the `Bridgeipelago` spectator slot. Remove `--dry-run` only when the game setup and APWorld installation are ready. Output defaults to the ignored `2026/3. Fall/.secrets/hidden/<run-id>/` directory, with a date-only run ID when `--run-id` is omitted. Check both hidden and revealed run folders before relying on that default; use a unique explicit `--run-id` for a repeated or named run.
 - The generator copies `YAML/.host.yaml` to the private workspace as `host.yaml` and runs Archipelago from that workspace, so omitted generator defaults come from the copied host file. An explicit option such as `--spoiler 1` overrides the host value for that run.
 - After generation, run `python scripts/publish_session_artifacts.py --season "2026/3. Fall" --run <run-id> --dry-run`, review the destination, then rerun without `--dry-run` to copy `YYYY-MM-DD_seed.zip` and `YYYY-MM-DD_spoiler.txt` into the appropriate subfolder under `2026/3. Fall/.secrets/revealed/`. No extra `revealed` folder is created inside the private run; leave the full generation workspace private under `.secrets/hidden/`.
 - The generator requires an installed Archipelago version at least as new as the highest `requires.version` in the playable YAMLs. It verifies the four season APWorld archives against `custom_worlds/`; add `--sync-apworlds` only to copy a reviewed archive when it is missing or differs.
@@ -49,4 +49,5 @@
 - The Fall APWorld directory contains the Sekiro, Pokemon Crystal, Ori and the Will of the Wisps, and Baldur's Gate 3 - ToT world archives used by the corresponding YAMLs.
 - Baldur's Gate 3 - ToT uses `bg3tot.apworld` v1.2.2. Install the matching `ArchipelagoToT.pak` from the linked v1.2.2 release and add the required `AdvancedTTSpells` mod. Follow the setup guide for the Mod Manager load order and client steps.
 - The checked-in Super Mario 64 and Overcooked! 2 templates list Archipelago 0.6.7 as the minimum, but both imported YAMLs omit `requires.version`. Confirm the installed Archipelago version is at least 0.6.7 before generation.
+- `Bridgeipelago` is the season's self-hosted Discord tracking bot. It joins as a spectator slot from `YAML/Bridgeipelago_Archipelago_v1.yaml` (game `Archipelago`; no items or locations, no effect on the multiworld). See [Discord tracking bot](../../docs/discord-bot.md) for hosting and configuration. Its `config.json` holds the Discord token and room password and must never be committed.
 - ROMs are not provided or linked in this repository; see [Archipelago.md](../../Archipelago.md) for policy.
