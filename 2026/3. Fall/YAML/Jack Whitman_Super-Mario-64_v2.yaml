@@ -6,7 +6,7 @@ Super Mario 64:
   accessibility: full
   death_link: 'false'
   completion_type: all_bowser_stages
-  area_rando: courses_and_secrets
+  area_rando: courses_and_secrets_separate
   buddy_checks: 'false'
   exclamation_boxes: 'false'
   progressive_keys: 'false'
@@ -22,9 +22,7 @@ Super Mario 64:
   - Side Flip
   - Wall Kick
   - Dive
-  - Ground Pound
   - Kick
-  - Climb
   - Ledge Grab
   strict_move_requirements: 'true'
   amount_of_stars: '120'
