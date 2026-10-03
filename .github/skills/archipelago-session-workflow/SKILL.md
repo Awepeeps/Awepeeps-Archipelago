@@ -15,6 +15,8 @@ Use this skill for session lifecycle work in this repository. The scripts are th
 - Publish staged artifacts: `python scripts/publish_session_artifacts.py --dry-run`
 - Final gate: `python scripts/validate_repo.py`
 
+Prefer the `just` recipes (`just scaffold`, `just compare`, `just generate`, `just publish`, `just check`), which wrap these scripts; `just --list` shows them. Pass script flags through the recipe, for example `just generate --dry-run` or `just publish 2026-10-03_test --dry-run`.
+
 Read [docs/session-workflow.md](../../../docs/session-workflow.md) for arguments, layout, and the private/revealed boundary. Read [docs/agent-workflows.md](../../../docs/agent-workflows.md) for repository-specific safety rules.
 
 ## Required behavior

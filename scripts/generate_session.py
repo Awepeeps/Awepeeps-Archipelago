@@ -54,9 +54,16 @@ def parse_args() -> argparse.Namespace:
         help="Output workspace name. Defaults to the current local date.",
     )
     parser.add_argument(
-        "--workspace-root",
+        "--input",
         type=Path,
-        help="Override the output root; defaults to the season's .secrets/hidden directory.",
+        help="Directory of player YAML files; defaults to <season>/YAML.",
+    )
+    parser.add_argument(
+        "--output",
+        "--workspace-root",
+        dest="output",
+        type=Path,
+        help="Output root for the run workspace; defaults to <season>/.secrets/hidden.",
     )
     parser.add_argument(
         "--generator",
@@ -278,6 +285,7 @@ def build_workspace(
     players: list[PlayerInput],
     run_id: str,
     workspace_root: Path | None,
+    host_path: Path,
     dry_run: bool,
 ) -> tuple[Path, Path, Path]:
     root = (workspace_root or season / ".secrets" / "hidden").resolve()
@@ -292,7 +300,7 @@ def build_workspace(
 
     players_dir.mkdir(parents=True)
     output_dir.mkdir()
-    shutil.copy2(season / "YAML" / ".host.yaml", workspace / "host.yaml")
+    shutil.copy2(host_path, workspace / "host.yaml")
     for player in players:
         shutil.copy2(player.source, players_dir / player.source.name)
     return workspace, players_dir, output_dir
@@ -306,6 +314,7 @@ def write_manifest(
     archipelago_version: str | None,
     generator: Path,
     command: list[str],
+    host_path: Path,
 ) -> None:
     manifest = {
         "generated_at": datetime.now().astimezone().isoformat(timespec="seconds"),
@@ -317,7 +326,7 @@ def write_manifest(
             for player in players
         ],
         "apworlds": [{"file": path.name, "sha256": file_hash(path)} for path in apworlds],
-        "host_sha256": file_hash(season / "YAML" / ".host.yaml"),
+        "host_sha256": file_hash(host_path),
         "command": command,
     }
     (workspace / "generation-manifest.json").write_text(
@@ -386,8 +395,16 @@ def main() -> int:
         if not archipelago.is_dir():
             raise GenerationError(f"Archipelago directory not found: {archipelago}")
 
-        yaml_dir = season / "YAML"
+        yaml_dir = (
+            resolve_path(args.input, ROOT).resolve()
+            if args.input is not None
+            else season / "YAML"
+        )
+        if not yaml_dir.is_dir():
+            raise GenerationError(f"player YAML directory not found: {yaml_dir}")
         host_path = yaml_dir / ".host.yaml"
+        if not host_path.is_file():
+            host_path = season / "YAML" / ".host.yaml"
         if not host_path.is_file():
             raise GenerationError(f"missing season host configuration: {host_path}")
 
@@ -396,13 +413,14 @@ def main() -> int:
         apworlds = sync_apworlds(season, archipelago, args.sync_apworlds, args.dry_run)
         generator = find_generator(archipelago, args.generator)
         run_id = safe_run_id(args.run_id)
-        workspace_root = resolve_path(args.workspace_root, ROOT) if args.workspace_root is not None else None
-        reject_default_run_id_collision(season, run_id, args.run_id is not None, workspace_root)
+        output_root = resolve_path(args.output, ROOT) if args.output is not None else None
+        reject_default_run_id_collision(season, run_id, args.run_id is not None, output_root)
         workspace, players_dir, output_dir = build_workspace(
             season,
             players,
             run_id,
-            workspace_root,
+            output_root,
+            host_path,
             args.dry_run,
         )
         command = build_command(generator, players_dir, output_dir, args.seed, args.spoiler)
@@ -420,7 +438,7 @@ def main() -> int:
         if result.returncode != 0:
             raise GenerationError(f"Archipelago generation failed with exit code {result.returncode}")
         seed_path, spoiler_path = stage_revealed_files(workspace, output_dir)
-        write_manifest(workspace, season, players, apworlds, archipelago_version, generator, command)
+        write_manifest(workspace, season, players, apworlds, archipelago_version, generator, command, host_path)
         print(f"Generation complete. Inspect staged seed and spoiler files in: {workspace}")
         print(
             "Move these staged files into the appropriate date folder under "
