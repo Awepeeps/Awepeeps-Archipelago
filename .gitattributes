@@ -1,0 +1,4 @@
+# This repository uses LF line endings for all text files.
+# `text=auto` keeps binary files untouched (detected via NUL bytes);
+# `eol=lf` forces LF on checkout and normalizes CRLF -> LF on commit.
+* text=auto eol=lf
