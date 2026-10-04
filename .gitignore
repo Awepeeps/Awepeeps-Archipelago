@@ -1,6 +1,12 @@
 # Ignore root admin folder
 .admin/
 
+# Ignore a local Discord bot checkout if it is placed in the repository
+bridgeipelago/
+
+# Ignore Playwright CLI scratch output (snapshots, console logs)
+.playwright-cli/
+
 # Ignore Python-generated cache files
 __pycache__/
 *.py[cod]

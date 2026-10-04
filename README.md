@@ -24,7 +24,7 @@ Spring and Summer 2026 are archived. Their historical YAMLs may retain `{player}
 5. Use the season's `YAML/.host.yaml` for host settings when generating. Its `player_files_path: "Players"` and `output_path: "output"` are relative to the Archipelago installation, not this repository.
 6. Keep generated private spoilers, logs, and credentials in `.secrets/hidden/` or another ignored local directory. Move a file to `.secrets/revealed/` only when it is intentionally shareable.
 
-For the complete create, generate, publish, and archive workflow, see [Session workflow](docs/session-workflow.md). AI agents should also follow [Agent workflows](docs/agent-workflows.md).
+For the complete create, generate, publish, and archive workflow, see [Session workflow](docs/session-workflow.md). AI agents should also follow [Agent workflows](docs/agent-workflows.md). For the optional self-hosted Discord tracking bot, see [Discord bot](docs/discord-bot.md).
 
 ### Reproducible session generation
 
@@ -44,6 +44,28 @@ After reviewing the reported players and command, omit `--dry-run` to generate. 
 Do not copy generated output into `.secrets/revealed/` unless the spoiler or seed is deliberately being shared with the group.
 
 Game-specific caveats belong in the season README. For example, Fall 2026 documents the SM64 decompilation workflow and the local Crystal ROM filename expected by its host configuration.
+
+## Common tasks
+
+Common workflows have `just` recipes so humans and agents do not retype long commands. Run `just --list` for the full set; `just check` is the pre-review gate.
+
+```powershell
+just validate   # repository validator
+just compile    # byte-compile scripts
+just check      # validate + compile
+just scaffold   # scripts/scaffold_session.py (arguments pass through)
+just compare    # scripts/compare_player_yaml.py (pass two paths)
+just generate   # scripts/generate_session.py (arguments pass through)
+just publish    # scripts/publish_session_artifacts.py (pass a run id)
+```
+
+The `generate` recipe reads the current season's YAMLs and writes to its `.secrets/hidden` directory by default. Override `season`, `input`, and `output` when needed, for example:
+
+```powershell
+just season="2026/4. Winter" input="2026/4. Winter/YAML" output="2026/4. Winter/.secrets/hidden" generate --dry-run
+just generate --run-id 2026-10-03_test
+just publish 2026-10-03_test --dry-run
+```
 
 ## Validation
 
