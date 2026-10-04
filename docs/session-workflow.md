@@ -57,7 +57,7 @@ python scripts/generate_session.py `
     --dry-run
 ```
 
-After reviewing the player list and generator command, remove `--dry-run`. Use an explicit unique `--run-id` for named or repeated runs. If the date-only default already exists under either `.secrets/hidden/` or `.secrets/revealed/`, the generator requires an explicit new ID. Use `--seed <number>` only when a known numeric seed is required. Use `--sync-apworlds` only after reviewing the checked-in archive and its source; the default behavior stops on missing or different installed APWorlds.
+After reviewing the player list and generator command, remove `--dry-run`. Use an explicit unique `--run-id` for named or repeated runs. Point at a different player YAML folder or output root with `--input <player-yaml-dir>` and `--output <workspace-root>`; the defaults are `<season>/YAML` and `<season>/.secrets/hidden`. The `just generate` and `just publish` recipes wrap these commands. If the date-only default already exists under either `.secrets/hidden/` or `.secrets/revealed/`, the generator requires an explicit new ID. Use `--seed <number>` only when a known numeric seed is required. Use `--sync-apworlds` only after reviewing the checked-in archive and its source; the default behavior stops on missing or different installed APWorlds.
 
 The generator copies `YAML/.host.yaml` to the private workspace as `host.yaml` and runs `ArchipelagoGenerate` with that workspace as its current directory. Archipelago therefore loads omitted generator defaults, including spoiler level, from that copied file; a command-line option such as `--spoiler 1` overrides the corresponding host setting.
 
@@ -99,6 +99,10 @@ python scripts/publish_session_artifacts.py `
 The publisher requires matching `YYYY-MM-DD` names, a readable and intact seed ZIP, a non-empty UTF-8 spoiler, and no ROM-like entries inside the seed. It refuses to overwrite existing artifacts unless `--overwrite` is explicit. It copies into `.secrets/revealed/<destination>/`; it does not delete the private source.
 
 Only publish a spoiler when the group intentionally wants it revealed. A hosted session normally needs the seed archive, while the spoiler remains a deliberate disclosure choice.
+
+## Discord tracking bot
+
+A session may run the self-hosted `bridgeipelago` bot for live check, death, and hint activity in Discord. It connects as a spectator slot, so its YAML is a normal season player input. Hosting, configuration, and the secrets boundary are documented in [Discord bot](discord-bot.md).
 
 ## Close or archive a season
 

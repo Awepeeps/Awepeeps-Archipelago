@@ -44,3 +44,5 @@ python scripts/validate_repo.py
 ```
 
 The GitHub workflow runs the same validator on pushes and pull requests. A passing check does not replace human review of game settings, ROM compatibility, APWorld provenance, or generated spoiler handling.
+
+The same checks are available through the `just` task runner: `just check` runs the validator and byte-compiles the scripts, and `just --list` shows every recipe. The scripts remain the source of truth.
