@@ -221,7 +221,7 @@ oot_soh_options:
   allow_true_no_logic: false
 pokemon_crystal_settings:
   # File name of your English Pokemon Crystal ROM
-  rom_file: "Pokemon - Crystal Version (USA).gbc"
+  rom_file: "../../../.roms/Pokemon - Crystal Version (UE) (V1.1) [C][!].gbc"
   option_overrides:
     # Enter your overrides here
 sml2_options:
