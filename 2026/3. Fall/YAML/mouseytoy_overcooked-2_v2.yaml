@@ -13,7 +13,7 @@ Overcooked! 2:
   - Seasonal
   include_horde_levels: 'true'
   prep_levels: excluded
-  kevin_levels: 'true'
+  kevin_levels: 'false'
   fix_bugs: 'true'
   shorter_level_duration: 'true'
   short_horde_levels: 'true'
