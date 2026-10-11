@@ -11,6 +11,8 @@ This repository organizes Archipelago multiworld configurations, setup reference
 - `.secrets/revealed/`: spoiler logs or other files intentionally shared with the repository.
 - `.secrets/hidden/`: private local files; this path is ignored.
 - `.roms/`: local ROM storage; this path is ignored and must stay local.
+- `.worktreeinclude`: tracked list of local-only paths (season ROM stashes, `.admin/`, `bridgeipelago/config.json`) that new worktrees need. Every path it lists is gitignored, so the file references paths without committing them.
+- `.admin/`: local admin scripts and session id; this path is ignored and must stay local.
 - [Archipelago resources](Archipelago.md): general setup and community links.
 
 Spring and Summer 2026 are archived. Their historical YAMLs may retain `{player}` placeholders. New or active-season YAMLs use the literal in-game player name in `name:`.

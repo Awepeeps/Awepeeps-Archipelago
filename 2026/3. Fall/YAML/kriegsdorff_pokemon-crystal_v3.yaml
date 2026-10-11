@@ -76,7 +76,7 @@ Pokemon Crystal:
   randomize_pokegear: 'false'
   randomize_hidden_items: 'false'
   randomize_berry_trees: 'false'
-  randomize_pokedex: randomize
+  randomize_pokedex: vanilla
   randomize_pokemon_requests: 'off'
   randomize_fly_unlocks: 'off'
   randomize_bug_catching_contest: 'off'
@@ -148,7 +148,7 @@ Pokemon Crystal:
   tm_blocklist: []
   modernise_moves_generation: '0'
   modernise_moves_type: buffs_and_nerfs
-  randomize_trainer_parties: vanilla
+  randomize_trainer_parties: match_types
   trainer_party_blocklist: []
   boost_trainers: vanilla
   trainer_level_boost: '1'
