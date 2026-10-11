@@ -38,9 +38,17 @@ the season's player table.
 
 - `config.json` contains the Discord bot token and the room password. Never
   commit it, the token, the password, or the bot's data folders.
-- Keep the bridgeipelago clone and its `config.json` **outside** this
-  repository. If it must live here, put it under the ignored
-  `.secrets/hidden/` path.
+- Keeping the clone **outside** this repository is the recommended layout, and
+  it is how this repository is run. The bot's data folders and `.venv` are
+  large, stateful, and per-install, so an external clone keeps them out of any
+  worktree.
+- A repo-local clone under the ignored `bridgeipelago/` path is recognized by
+  [.worktreeinclude](../.worktreeinclude) so a worktree can run the bot without
+  a re-clone. Only `bridgeipelago/config.json` is listed there; the clone's data
+  folders and `.venv` are rebuildable and are deliberately not copied. If the
+  clone must live in the repository, `bridgeipelago/` is the ignored path; do not
+  use `.secrets/hidden/` for it, since that path is private generation workspace
+  and is excluded from `.worktreeinclude`.
 - The bot writes `logs/`, `RegistrationData/`, `ItemQueue/`, and `ArchData/`
   relative to its working directory, keyed by `UniqueID`. Run it from its own
   directory so those folders stay together.
