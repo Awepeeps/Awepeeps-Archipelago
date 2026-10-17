@@ -12,6 +12,7 @@ For branch synchronization or GitHub account problems, use [Git workflow](git-wo
 | Import player YAMLs or APWorlds | Use the scaffold command or copy into the selected season only | Preserve YAML settings and validate archive integrity |
 | Compare a renamed or normalized YAML | Run `scripts/compare_player_yaml.py` | Treat any non-metadata diff as a settings change |
 | Generate a seed | Run `scripts/generate_session.py --dry-run` | Review players, version, APWorld drift, and command before generation |
+| Host a generated seed | Run `scripts/host_session_room.py --dry-run` | Host under `.admin/session_id.env`, then update the README room link and the Discord bot |
 | Share seed/spoiler artifacts | Run `scripts/publish_session_artifacts.py --dry-run` | Publish only after ZIP, date, and destination checks pass |
 | Validate or prepare a pull request | Run `scripts/validate_repo.py` | Run `git diff --check` and inspect the final status |
 

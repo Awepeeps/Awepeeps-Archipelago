@@ -86,6 +86,27 @@ The completed run stays private under `.secrets/hidden/<run-id>/` and contains:
 
 The manifest records input hashes, the installed Archipelago version, the generator hash, and the command. Keep it with the private run when reproducibility or debugging matters. Publishing with `--run` rechecks the manifest structure and the player, APWorld, and host input hashes before copying artifacts.
 
+## Host the room
+
+Hosting is the standard step right after a successful generation. It uploads the run's seed to archipelago.gg as a room owned by the admin session stored in the ignored `.admin/session_id.env` (`SESSION_ID=<uuid>`, the same file `.admin/open-session.cmd` opens), so that session sees the room log and can run admin commands. If the browser is signed in to a different session, open `https://archipelago.gg/session/<SESSION_ID>` or update the env file before hosting.
+
+Always dry-run first:
+
+```powershell
+python scripts/host_session_room.py `
+    --season "2026/3. Fall" `
+    --run "2026-10-17" `
+    --dry-run
+```
+
+Then rerun the same command without `--dry-run`, or use the `just` recipe:
+
+```powershell
+just host 2026-10-17
+```
+
+The script requires HTTPS except for localhost, and strips the `*_Spoiler.txt` entry from the upload by default, because archipelago.gg otherwise serves the spoiler as a public download on the seed page. Use `--include-spoiler` only for a run whose spoiler is already revealed. It records the result in `room.json` inside the private run. If room creation succeeds but reading its page fails, it keeps a partial record with `complete: false` and prints the room URL; rerunning reports that incomplete record and does not create another room unless `--force` is given. A completed record has `complete: true`. After hosting, update the season README Session Links with the room URL (never the seed URL) and point the Discord bot at the room.
+
 ## Publish deliberately
 
 For a retained private run, validate and publish both artifacts together:

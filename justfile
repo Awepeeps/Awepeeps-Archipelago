@@ -40,6 +40,10 @@ compare *ARGS:
 generate *ARGS:
     python scripts/generate_session.py --season "{{season}}" --archipelago "{{archipelago}}" --input "{{input}}" --output "{{output}}" {{ARGS}}
 
+# Host a generated run as an archipelago.gg room under the stored admin session (.admin/session_id.env). Extra flags pass through, e.g. --dry-run.
+host run *ARGS:
+    python scripts/host_session_room.py --season "{{season}}" --run "{{run}}" {{ARGS}}
+
 # Publish seed/spoiler artifacts for a run. Extra flags pass through, e.g. --dry-run.
 publish run *ARGS:
     python scripts/publish_session_artifacts.py --season "{{season}}" --run "{{run}}" {{ARGS}}

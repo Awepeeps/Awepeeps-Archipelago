@@ -2,7 +2,7 @@
 
 A session may run a self-hosted Discord bot so the group can follow check,
 DeathLink, and hint activity in a channel. The supported bot is
-[bridgeipelago](https://github.com/Quasky/bridgeipelago) (v3.0.0 or newer),
+[bridgeipelago](https://github.com/Quasky/bridgeipelago) (v3.0.1 or newer),
 which connects to the room as a **spectator slot**. This document is the
 reusable procedure; the season README records the specific bot slot for that
 session.
@@ -61,11 +61,11 @@ Native Windows is unsupported by bridgeipelago v3; use WSL2 (or Docker).
    PowerShell, then reboot and set the Linux user.
 2. Install prerequisites (skip any already present):
    `sudo apt update && sudo apt install -y git python3 python3-venv python3-pip`
-3. Clone the pinned release and install dependencies:
+3. Clone our fork and check out the patched branch:
    ```bash
-   git clone https://github.com/Quasky/bridgeipelago.git ~/bridgeipelago
+   git clone https://github.com/Awepeeps/Awepeeps-bridgeipelago.git ~/bridgeipelago
    cd ~/bridgeipelago
-   git checkout live-v3.0.0
+   git checkout awepeeps-patches
    python3 -m venv .venv
    ./.venv/bin/python -m pip install --upgrade pip
    ./.venv/bin/python -m pip install -r requirements.txt
@@ -73,15 +73,69 @@ Native Windows is unsupported by bridgeipelago v3; use WSL2 (or Docker).
    ```
 4. Create `config.json` from the shipped template, apply the `LanguageFile`
    fix, and fill the values (see Configuration).
-5. Run it interactively, or install it as a WSL service (below):
-   `./.venv/bin/python bridgeipelago.py config.json`
+5. Run it interactively from the clone, or install it as a WSL service (below).
+   The wrapper forces the `fork` start method, which the bot needs on Python
+   3.14 (see Run as a WSL service):
+   ```bash
+   ./.venv/bin/python -u -c "import multiprocessing as m, runpy; m.set_start_method('fork'); runpy.run_path('bridgeipelago.py', run_name='__main__')" config.json
+   ```
 
 The clone lives outside this repository, so `config.json` and the data folders
 never enter Git. If a dependency will not build on the installed Python,
 install Python 3.12 and recreate the venv with it.
 
-Verified environment: WSL2 Ubuntu, Python 3.14, git 2.53, bridgeipelago
-`live-v3.0.0` (commit `a3e4e03`).
+Verified environment: WSL2 Ubuntu, Python 3.14.4, git 2.53, bridgeipelago
+`awepeeps-patches` (based on `live-v3.0.1`, commit `91a24ff`), websockets
+13.1, discord.py 2.7.1.
+
+### Forks and local changes
+
+- Upstream is
+  [Quasky/bridgeipelago](https://github.com/Quasky/bridgeipelago). The org fork
+  is
+  [Awepeeps/Awepeeps-bridgeipelago](https://github.com/Awepeeps/Awepeeps-bridgeipelago),
+  and the personal fork is
+  [deathpie/Awepeeps-bridgeipelago](https://github.com/deathpie/Awepeeps-bridgeipelago),
+  made from the org fork, so all three share one fork network.
+- All of our changes live as commits on the `awepeeps-patches` branch, which is
+  based on the upstream release tag currently in use (`live-v3.0.1`, commit
+  `91a24ff`). Do not commit onto a tag or onto `main`.
+- The branch is pushed to both forks, so `Awepeeps/Awepeeps-bridgeipelago` and
+  `deathpie/Awepeeps-bridgeipelago` stay identical. Push it to both after every
+  change.
+- To upgrade, rebase `awepeeps-patches` onto the new upstream tag and push it to
+  both forks (see Upgrading).
+- Current patches on `awepeeps-patches`:
+  - The port-change announcement: `CheckArchHost()` already detects a new
+    archipelago.gg room port, updates `config.json`, and reports it to the
+    debug channel; our patch also announces the new address in the broadcast
+    channel so players know where to reconnect.
+  - The `$help` command, which posts the player-command list in the channel.
+
+The live clone's remotes follow this layout: `upstream` for
+Quasky/bridgeipelago, `awepeeps` for the org fork, and `origin` for the personal
+fork.
+
+### Upgrading
+
+Because the clone runs `awepeeps-patches`, an upgrade rebases our patches onto
+the new upstream release tag instead of checking the tag out. Stop the service
+first so the bot does not run against a tree that changes underneath it:
+
+```bash
+systemctl --user stop bridgeipelago
+git fetch upstream --tags
+git rebase <new-upstream-tag>    # for example live-v3.0.2
+./.venv/bin/python -m pip install -r requirements.txt
+git push --force-with-lease awepeeps awepeeps-patches
+git push --force-with-lease origin awepeeps-patches
+systemctl --user start bridgeipelago
+```
+
+A rebase rewrites the branch, so both pushes need `--force-with-lease`. After a
+plain new commit (no rebase), push normally to both forks.
+
+`config.json` is unchanged from v3.0.0, so no migration is needed.
 
 ## Run as a WSL service
 
@@ -100,7 +154,7 @@ Wants=network-online.target
 [Service]
 Type=simple
 WorkingDirectory=/home/<user>/bridgeipelago
-ExecStart=/home/<user>/bridgeipelago/.venv/bin/python -u /home/<user>/bridgeipelago/bridgeipelago.py config.json
+ExecStart=/home/<user>/bridgeipelago/.venv/bin/python -u -c "import multiprocessing as m, runpy; m.set_start_method('fork'); runpy.run_path('bridgeipelago.py', run_name='__main__')" config.json
 Restart=on-failure
 RestartSec=10
 StandardOutput=append:/home/<user>/bridgeipelago/bot.out
@@ -109,6 +163,12 @@ StandardError=append:/home/<user>/bridgeipelago/bot.out
 [Install]
 WantedBy=default.target
 ```
+
+The wrapper exists because Python 3.14 defaults the Linux multiprocessing start
+method to `forkserver` (previously `fork`); bridgeipelago relies on the Discord
+child process inheriting a global lock, so under `forkserver` the bot's command
+loop dies with `NameError: name 'ToggleLock' is not defined`. Forcing `fork`
+avoids it without patching the bot.
 
 Then:
 
@@ -152,7 +212,7 @@ and `MetaConfig.LanguageFile` `en`.
 | `MetaConfig` | `FlavorDeathlink`, and `LanguageFile` (see gotcha) |
 | `AdvancedConfig` | `QueueOverclock`, `SnoozeCompletedGames`, `SelfHostNoWeb`, and the four data directories |
 
-**LanguageFile gotcha:** the v3.0.0 `config.json.template` omits
+**LanguageFile gotcha:** the v3.0.x `config.json.template` omits
 `MetaConfig.LanguageFile`, but the code reads it, so some messages render as
 `LANG_KEY_ERROR`. After copying the template, add the key:
 
@@ -200,15 +260,35 @@ that denies `Send Messages` makes the bot's `on_ready` fail with
 
 ## Registration and commands
 
-Commands run in the broadcast channel (the bot only reads messages there) and
-are case-sensitive. `$register` links your Discord account to a slot; the other
+Commands only work in the broadcast channel (#archipelago-gamers); the bot
+ignores messages everywhere else, including the debug channel. Commands are
+case-sensitive and lowercase. `$register` links your Discord account to a slot; the other
 player commands act on your registered slot(s). Upstream reference:
 [bridgeipelago commands](https://github.com/Quasky/bridgeipelago#commands).
 
-Player commands:
+The `awepeeps-patches` bot also registers the player commands as native Discord
+slash commands in the server containing the configured broadcast channel. Type
+`/` and select Shamiko-Bot to browse them. The existing `$` commands continue to
+work. Slash commands enforce the same broadcast channel restriction; confirmations
+and `/help` are private, catch-up and registration lists arrive by DM, and charts
+and requested hints are posted in the broadcast channel.
+
+Use `/register slot:<exact slot name>`, `/groupcheck slot:<exact slot name>`,
+and `/hint slot:<exact slot name> item:<item name>` for commands with arguments.
+`/ketchmeup` has an optional filter with Everything (default), Useful and
+progression, and Progression only choices. The other player command names match
+the `$` versions below. Admin and configuration commands remain message-only.
+
+The bot determines the server ID from the broadcast channel and syncs its player
+command list once after connecting. It requires application-command authorization
+and members need permission to use application commands in that channel. No new
+bot token, public web endpoint, or room generation is needed.
+
+Player commands (`$` syntax; slash equivalents are available in Discord):
 
 | Command | Effect |
 |---------|--------|
+| `$help` | Post this list of player commands in the channel |
 | `$register <slot>` | Link your Discord account to an Archipelago slot |
 | `$listreg` | DM the slots you are registered for |
 | `$clearreg` | Remove all of your registrations |
@@ -220,14 +300,15 @@ Player commands:
 | `$checkcount` | Post the current check counts |
 | `$checkgraph` | Post a check-progress graph image |
 
-Admin commands:
+Admin commands (upstream calls these admin-only, but the bot does not check
+who sent them, so anyone who can post in the broadcast channel can run them):
 
 | Command | Effect |
 |---------|--------|
 | `$hello`, `$iloveyou` | Trivial responses |
 | `$reloadtracker`, `$reloaddiscord` | Reload the tracker or the Discord client |
 | `$setconfig <key> <value>` | Change a `config.json` value (`ArchipelagoPort`, URLs, `UniqueID`) |
-| `$ArchInfo` | Debug details (only when `DebugMode` is on) |
+| `$archinfo` | Debug details (only when `DebugMode` is on) |
 
 ## Notifications
 
@@ -245,6 +326,10 @@ There are two separate paths with separate filters:
   which chooses the level per request. `$hints` DMs hinted items and
   `$groupcheck <slot>` DMs all queued items for a slot. There is no automatic
   push DM.
+- **Room port changes.** When archipelago.gg restarts a paused room on a new
+  port, the bot updates its own `config.json`, reports it in the debug channel,
+  and (via the `awepeeps-patches` branch) posts the new address in the
+  broadcast channel so players know where to reconnect.
 
 The bot identifies players by slot, so a second game on the same account is
 treated as someone else's items. Upstream: [bridgeipelago functionality](https://github.com/Quasky/bridgeipelago#functionality).
@@ -287,9 +372,19 @@ connect during the reload.
   bridgeipelago v3.0.0 calls `websockets.connect()` without a context manager,
   which newer versions no longer support. Install `websockets<14` in the venv
   (13.1 is verified) and restart.
-- **Relays still do not fire on Python 3.14.** The bot targets Python 3.12 (its
-  Dockerfile). If the loop tasks misbehave on a newer interpreter, build the
-  venv with Python 3.12 or use the Docker image.
+- **The bot reconnects every ~12 s and never posts checks.** The log repeats
+  `Unknown error in CheckDatapackage, returning False` and `DataPackage is
+  invalid, requesting new one`, and `ErrorLog` shows
+  `Error reading or validating datapackage: '<game>'`. v3.0.0 sends a bare
+  `GetDataPackage`, which the current archipelago.gg server answers with an
+  empty games dict, so `CheckDatapackage` fails and the bot loops. Upgrade to
+  `live-v3.0.1`, which requests the room's game list explicitly.
+- **`NameError: name 'ToggleLock' is not defined`.** Python 3.14 changed the
+  Linux default multiprocessing start method to `forkserver`, so the Discord
+  child process no longer inherits the global lock; the command loop dies the
+  first time a port rescan is requested, which also breaks `$reloaddiscord`,
+  `CycleDiscord`, and the port-change hand-off. Launch the bot with the `fork`
+  wrapper (see Run as a WSL service), or build the venv with Python 3.12/3.13.
 
 ## Trust
 
