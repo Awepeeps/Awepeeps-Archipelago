@@ -6,6 +6,7 @@ import argparse
 import http.cookiejar
 import io
 import json
+import os
 import re
 import sys
 import uuid
@@ -149,7 +150,7 @@ def build_upload_bytes(seed: Path, include_spoiler: bool) -> bytes:
         for entry in source.infolist():
             if entry.filename.endswith(SPOILER_SUFFIX):
                 continue
-            target.writestr(entry, source.read(entry.filename))
+            target.writestr(entry, source.read(entry))
     return buffer.getvalue()
 
 
@@ -192,6 +193,30 @@ def existing_room_url(room_record: Path) -> str:
     if not isinstance(room_url, str) or not room_url:
         raise HostError(f"existing room record is missing room_url: {room_record}")
     return room_url
+
+
+def validate_host(host: str) -> tuple[str, str]:
+    host = host.rstrip("/")
+    parsed = urlsplit(host)
+    hostname = parsed.hostname
+    if parsed.scheme not in {"http", "https"} or not hostname:
+        raise HostError("--host must be an http(s) URL with a hostname")
+    if parsed.scheme == "http" and hostname.lower() not in {"localhost", "127.0.0.1", "::1"}:
+        raise HostError("--host must use HTTPS unless the hostname is localhost, 127.0.0.1, or ::1")
+    return host, hostname
+
+
+def write_room_record(room_record: Path, record: dict) -> None:
+    temporary = room_record.with_name(f".{room_record.name}.{uuid.uuid4().hex}.tmp")
+    try:
+        temporary.write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
+        os.replace(temporary, room_record)
+    except OSError as exc:
+        try:
+            temporary.unlink()
+        except OSError:
+            pass
+        raise HostError(f"could not write room record {room_record}: {exc}") from exc
 
 
 def fetch(
@@ -309,18 +334,19 @@ def main() -> int:
         if not season.is_dir():
             raise HostError(f"season directory not found: {season}")
 
-        host = args.host.rstrip("/")
-        if not host.startswith(("http://", "https://")):
-            raise HostError("--host must be an http(s) URL")
-        hostname = urlsplit(host).hostname
-        if not hostname:
-            raise HostError(f"could not determine the hostname from --host: {host}")
+        host, hostname = validate_host(args.host)
 
         run_dir = resolve_run(season, args.run)
         room_record = run_dir / "room.json"
         if room_record.exists() and not args.force:
             print(f"Room already recorded for run {run_dir.name}: {room_record}")
             print(f"Room URL: {existing_room_url(room_record)}")
+            try:
+                prior_record = json.loads(room_record.read_text(encoding="utf-8"))
+            except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+                raise HostError(f"could not read existing room record {room_record}: {exc}") from exc
+            if not isinstance(prior_record, dict) or prior_record.get("complete") is not True:
+                print("Room record is incomplete; the room exists but hosting did not finish.")
             print("Re-run with --force to create an additional room.")
             return 0
 
@@ -372,8 +398,6 @@ def main() -> int:
         seed_url = f"{host}/seed/{seed_id}"
         room_id = create_room(manual, host, seed_id)
         room_url = f"{host}/room/{room_id}"
-        port, tracker_url = read_room_page(follow, host, room_id, hostname)
-
         record = {
             "run": run_dir.name,
             "seed_file": seed.name,
@@ -381,11 +405,23 @@ def main() -> int:
             "host": host,
             "seed_url": seed_url,
             "room_url": room_url,
-            "tracker_url": tracker_url,
-            "port": port,
             "created_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+            "tracker_url": None,
+            "port": None,
+            "complete": False,
         }
-        room_record.write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
+        try:
+            write_room_record(room_record, record)
+        except HostError as exc:
+            print(f"Room URL: {room_url}")
+            raise HostError(f"room exists, but its partial record could not be saved: {exc}") from exc
+        try:
+            port, tracker_url = read_room_page(follow, host, room_id, hostname)
+        except HostError as exc:
+            print(f"Room URL: {room_url}")
+            raise HostError(f"room exists, but its page could not be read; partial record kept: {exc}") from exc
+        record.update({"tracker_url": tracker_url, "port": port, "complete": True})
+        write_room_record(room_record, record)
 
         print(f"Seed URL: {seed_url}")
         print(f"Room URL: {room_url}")

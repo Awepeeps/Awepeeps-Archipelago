@@ -105,7 +105,7 @@ Then rerun the same command without `--dry-run`, or use the `just` recipe:
 just host 2026-10-17
 ```
 
-The script strips the `*_Spoiler.txt` entry from the upload by default, because archipelago.gg otherwise serves the spoiler as a public download on the seed page. Use `--include-spoiler` only for a run whose spoiler is already revealed. It records the result in `room.json` inside the private run, so rerunning is a no-op unless `--force` is given, and `--force` creates an additional room. After hosting, update the season README Session Links with the room URL (never the seed URL) and point the Discord bot at the room.
+The script requires HTTPS except for localhost, and strips the `*_Spoiler.txt` entry from the upload by default, because archipelago.gg otherwise serves the spoiler as a public download on the seed page. Use `--include-spoiler` only for a run whose spoiler is already revealed. It records the result in `room.json` inside the private run. If room creation succeeds but reading its page fails, it keeps a partial record with `complete: false` and prints the room URL; rerunning reports that incomplete record and does not create another room unless `--force` is given. A completed record has `complete: true`. After hosting, update the season README Session Links with the room URL (never the seed URL) and point the Discord bot at the room.
 
 ## Publish deliberately
 
