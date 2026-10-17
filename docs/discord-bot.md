@@ -63,7 +63,7 @@ Native Windows is unsupported by bridgeipelago v3; use WSL2 (or Docker).
    `sudo apt update && sudo apt install -y git python3 python3-venv python3-pip`
 3. Clone our fork and check out the patched branch:
    ```bash
-   git clone https://github.com/Awepeeps/bridgeipelago.git ~/bridgeipelago
+   git clone https://github.com/Awepeeps/Awepeeps-bridgeipelago.git ~/bridgeipelago
    cd ~/bridgeipelago
    git checkout awepeeps-patches
    python3 -m venv .venv
@@ -92,20 +92,25 @@ Verified environment: WSL2 Ubuntu, Python 3.14.4, git 2.53, bridgeipelago
 
 - Upstream is
   [Quasky/bridgeipelago](https://github.com/Quasky/bridgeipelago). The org fork
-  is [Awepeeps/bridgeipelago](https://github.com/Awepeeps/bridgeipelago), and
-  the personal fork is
-  [deathpie/bridgeipelago](https://github.com/deathpie/bridgeipelago), made
-  from the org fork, so all three share one fork network.
+  is
+  [Awepeeps/Awepeeps-bridgeipelago](https://github.com/Awepeeps/Awepeeps-bridgeipelago),
+  and the personal fork is
+  [deathpie/Awepeeps-bridgeipelago](https://github.com/deathpie/Awepeeps-bridgeipelago),
+  made from the org fork, so all three share one fork network.
 - All of our changes live as commits on the `awepeeps-patches` branch, which is
   based on the upstream release tag currently in use (`live-v3.0.1`, commit
   `91a24ff`). Do not commit onto a tag or onto `main`.
-- The branch is pushed to both forks, so `Awepeeps/bridgeipelago` and
-  `deathpie/bridgeipelago` stay identical. Push it to both after every change.
+- The branch is pushed to both forks, so `Awepeeps/Awepeeps-bridgeipelago` and
+  `deathpie/Awepeeps-bridgeipelago` stay identical. Push it to both after every
+  change.
 - To upgrade, rebase `awepeeps-patches` onto the new upstream tag and push it to
   both forks (see Upgrading).
-- Current patch: `CheckArchHost()` already detects a new archipelago.gg room
-  port and reports it to the debug channel; `awepeeps-patches` also announces
-  the new port in the broadcast channel so players know where to reconnect.
+- Current patches on `awepeeps-patches`:
+  - The port-change announcement: `CheckArchHost()` already detects a new
+    archipelago.gg room port, updates `config.json`, and reports it to the
+    debug channel; our patch also announces the new address in the broadcast
+    channel so players know where to reconnect.
+  - The `$help` command, which posts the player-command list in the channel.
 
 The live clone's remotes follow this layout: `upstream` for
 Quasky/bridgeipelago, `awepeeps` for the org fork, and `origin` for the personal
@@ -265,6 +270,7 @@ Player commands:
 
 | Command | Effect |
 |---------|--------|
+| `$help` | Post this list of player commands in the channel |
 | `$register <slot>` | Link your Discord account to an Archipelago slot |
 | `$listreg` | DM the slots you are registered for |
 | `$clearreg` | Remove all of your registrations |
