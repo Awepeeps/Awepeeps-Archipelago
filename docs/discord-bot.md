@@ -61,11 +61,11 @@ Native Windows is unsupported by bridgeipelago v3; use WSL2 (or Docker).
    PowerShell, then reboot and set the Linux user.
 2. Install prerequisites (skip any already present):
    `sudo apt update && sudo apt install -y git python3 python3-venv python3-pip`
-3. Clone the pinned release and install dependencies:
+3. Clone our fork and check out the patched branch:
    ```bash
-   git clone https://github.com/Quasky/bridgeipelago.git ~/bridgeipelago
+   git clone https://github.com/Awepeeps/bridgeipelago.git ~/bridgeipelago
    cd ~/bridgeipelago
-   git checkout live-v3.0.1
+   git checkout awepeeps-patches
    python3 -m venv .venv
    ./.venv/bin/python -m pip install --upgrade pip
    ./.venv/bin/python -m pip install -r requirements.txt
@@ -85,18 +85,50 @@ never enter Git. If a dependency will not build on the installed Python,
 install Python 3.12 and recreate the venv with it.
 
 Verified environment: WSL2 Ubuntu, Python 3.14.4, git 2.53, bridgeipelago
-`live-v3.0.1` (commit `91a24ff`), websockets 13.1, discord.py 2.7.1.
+`awepeeps-patches` (based on `live-v3.0.1`, commit `91a24ff`), websockets
+13.1, discord.py 2.7.1.
+
+### Forks and local changes
+
+- Upstream is
+  [Quasky/bridgeipelago](https://github.com/Quasky/bridgeipelago). The org fork
+  is [Awepeeps/bridgeipelago](https://github.com/Awepeeps/bridgeipelago), and
+  the personal fork is
+  [deathpie/bridgeipelago](https://github.com/deathpie/bridgeipelago), made
+  from the org fork, so all three share one fork network.
+- All of our changes live as commits on the `awepeeps-patches` branch, which is
+  based on the upstream release tag currently in use (`live-v3.0.1`, commit
+  `91a24ff`). Do not commit onto a tag or onto `main`.
+- The branch is pushed to both forks, so `Awepeeps/bridgeipelago` and
+  `deathpie/bridgeipelago` stay identical. Push it to both after every change.
+- To upgrade, rebase `awepeeps-patches` onto the new upstream tag and push it to
+  both forks (see Upgrading).
+- Current patch: `CheckArchHost()` already detects a new archipelago.gg room
+  port and reports it to the debug channel; `awepeeps-patches` also announces
+  the new port in the broadcast channel so players know where to reconnect.
+
+The live clone's remotes follow this layout: `upstream` for
+Quasky/bridgeipelago, `awepeeps` for the org fork, and `origin` for the personal
+fork.
 
 ### Upgrading
 
-To move an existing clone to the pinned release:
+Because the clone runs `awepeeps-patches`, an upgrade rebases our patches onto
+the new upstream release tag instead of checking the tag out. Stop the service
+first so the bot does not run against a tree that changes underneath it:
 
 ```bash
 systemctl --user stop bridgeipelago
-git fetch --tags
-git checkout live-v3.0.1
+git fetch upstream --tags
+git rebase <new-upstream-tag>    # for example live-v3.0.2
+./.venv/bin/python -m pip install -r requirements.txt
+git push --force-with-lease awepeeps awepeeps-patches
+git push --force-with-lease origin awepeeps-patches
 systemctl --user start bridgeipelago
 ```
+
+A rebase rewrites the branch, so both pushes need `--force-with-lease`. After a
+plain new commit (no rebase), push normally to both forks.
 
 `config.json` is unchanged from v3.0.0, so no migration is needed.
 
