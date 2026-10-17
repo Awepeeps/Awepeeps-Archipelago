@@ -2,7 +2,7 @@
 
 A session may run a self-hosted Discord bot so the group can follow check,
 DeathLink, and hint activity in a channel. The supported bot is
-[bridgeipelago](https://github.com/Quasky/bridgeipelago) (v3.0.0 or newer),
+[bridgeipelago](https://github.com/Quasky/bridgeipelago) (v3.0.1 or newer),
 which connects to the room as a **spectator slot**. This document is the
 reusable procedure; the season README records the specific bot slot for that
 session.
@@ -65,7 +65,7 @@ Native Windows is unsupported by bridgeipelago v3; use WSL2 (or Docker).
    ```bash
    git clone https://github.com/Quasky/bridgeipelago.git ~/bridgeipelago
    cd ~/bridgeipelago
-   git checkout live-v3.0.0
+   git checkout live-v3.0.1
    python3 -m venv .venv
    ./.venv/bin/python -m pip install --upgrade pip
    ./.venv/bin/python -m pip install -r requirements.txt
@@ -73,15 +73,32 @@ Native Windows is unsupported by bridgeipelago v3; use WSL2 (or Docker).
    ```
 4. Create `config.json` from the shipped template, apply the `LanguageFile`
    fix, and fill the values (see Configuration).
-5. Run it interactively, or install it as a WSL service (below):
-   `./.venv/bin/python bridgeipelago.py config.json`
+5. Run it interactively from the clone, or install it as a WSL service (below).
+   The wrapper forces the `fork` start method, which the bot needs on Python
+   3.14 (see Run as a WSL service):
+   ```bash
+   ./.venv/bin/python -u -c "import multiprocessing as m, runpy; m.set_start_method('fork'); runpy.run_path('bridgeipelago.py', run_name='__main__')" config.json
+   ```
 
 The clone lives outside this repository, so `config.json` and the data folders
 never enter Git. If a dependency will not build on the installed Python,
 install Python 3.12 and recreate the venv with it.
 
-Verified environment: WSL2 Ubuntu, Python 3.14, git 2.53, bridgeipelago
-`live-v3.0.0` (commit `a3e4e03`).
+Verified environment: WSL2 Ubuntu, Python 3.14.4, git 2.53, bridgeipelago
+`live-v3.0.1` (commit `91a24ff`), websockets 13.1, discord.py 2.7.1.
+
+### Upgrading
+
+To move an existing clone to the pinned release:
+
+```bash
+systemctl --user stop bridgeipelago
+git fetch --tags
+git checkout live-v3.0.1
+systemctl --user start bridgeipelago
+```
+
+`config.json` is unchanged from v3.0.0, so no migration is needed.
 
 ## Run as a WSL service
 
@@ -100,7 +117,7 @@ Wants=network-online.target
 [Service]
 Type=simple
 WorkingDirectory=/home/<user>/bridgeipelago
-ExecStart=/home/<user>/bridgeipelago/.venv/bin/python -u /home/<user>/bridgeipelago/bridgeipelago.py config.json
+ExecStart=/home/<user>/bridgeipelago/.venv/bin/python -u -c "import multiprocessing as m, runpy; m.set_start_method('fork'); runpy.run_path('bridgeipelago.py', run_name='__main__')" config.json
 Restart=on-failure
 RestartSec=10
 StandardOutput=append:/home/<user>/bridgeipelago/bot.out
@@ -109,6 +126,12 @@ StandardError=append:/home/<user>/bridgeipelago/bot.out
 [Install]
 WantedBy=default.target
 ```
+
+The wrapper exists because Python 3.14 defaults the Linux multiprocessing start
+method to `forkserver` (previously `fork`); bridgeipelago relies on the Discord
+child process inheriting a global lock, so under `forkserver` the bot's command
+loop dies with `NameError: name 'ToggleLock' is not defined`. Forcing `fork`
+avoids it without patching the bot.
 
 Then:
 
@@ -152,7 +175,7 @@ and `MetaConfig.LanguageFile` `en`.
 | `MetaConfig` | `FlavorDeathlink`, and `LanguageFile` (see gotcha) |
 | `AdvancedConfig` | `QueueOverclock`, `SnoozeCompletedGames`, `SelfHostNoWeb`, and the four data directories |
 
-**LanguageFile gotcha:** the v3.0.0 `config.json.template` omits
+**LanguageFile gotcha:** the v3.0.x `config.json.template` omits
 `MetaConfig.LanguageFile`, but the code reads it, so some messages render as
 `LANG_KEY_ERROR`. After copying the template, add the key:
 
@@ -287,9 +310,19 @@ connect during the reload.
   bridgeipelago v3.0.0 calls `websockets.connect()` without a context manager,
   which newer versions no longer support. Install `websockets<14` in the venv
   (13.1 is verified) and restart.
-- **Relays still do not fire on Python 3.14.** The bot targets Python 3.12 (its
-  Dockerfile). If the loop tasks misbehave on a newer interpreter, build the
-  venv with Python 3.12 or use the Docker image.
+- **The bot reconnects every ~12 s and never posts checks.** The log repeats
+  `Unknown error in CheckDatapackage, returning False` and `DataPackage is
+  invalid, requesting new one`, and `ErrorLog` shows
+  `Error reading or validating datapackage: '<game>'`. v3.0.0 sends a bare
+  `GetDataPackage`, which the current archipelago.gg server answers with an
+  empty games dict, so `CheckDatapackage` fails and the bot loops. Upgrade to
+  `live-v3.0.1`, which requests the room's game list explicitly.
+- **`NameError: name 'ToggleLock' is not defined`.** Python 3.14 changed the
+  Linux default multiprocessing start method to `forkserver`, so the Discord
+  child process no longer inherits the global lock; the command loop dies the
+  first time a port rescan is requested, which also breaks `$reloaddiscord`,
+  `CycleDiscord`, and the port-change hand-off. Launch the bot with the `fork`
+  wrapper (see Run as a WSL service), or build the venv with Python 3.12/3.13.
 
 ## Trust
 
