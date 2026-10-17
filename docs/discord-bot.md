@@ -255,8 +255,9 @@ that denies `Send Messages` makes the bot's `on_ready` fail with
 
 ## Registration and commands
 
-Commands run in the broadcast channel (the bot only reads messages there) and
-are case-sensitive. `$register` links your Discord account to a slot; the other
+Commands only work in the broadcast channel (#archipelago-gamers); the bot
+ignores messages everywhere else, including the debug channel. Commands are
+case-sensitive and lowercase. `$register` links your Discord account to a slot; the other
 player commands act on your registered slot(s). Upstream reference:
 [bridgeipelago commands](https://github.com/Quasky/bridgeipelago#commands).
 
@@ -275,14 +276,15 @@ Player commands:
 | `$checkcount` | Post the current check counts |
 | `$checkgraph` | Post a check-progress graph image |
 
-Admin commands:
+Admin commands (upstream calls these admin-only, but the bot does not check
+who sent them, so anyone who can post in the broadcast channel can run them):
 
 | Command | Effect |
 |---------|--------|
 | `$hello`, `$iloveyou` | Trivial responses |
 | `$reloadtracker`, `$reloaddiscord` | Reload the tracker or the Discord client |
 | `$setconfig <key> <value>` | Change a `config.json` value (`ArchipelagoPort`, URLs, `UniqueID`) |
-| `$ArchInfo` | Debug details (only when `DebugMode` is on) |
+| `$archinfo` | Debug details (only when `DebugMode` is on) |
 
 ## Notifications
 
@@ -300,6 +302,10 @@ There are two separate paths with separate filters:
   which chooses the level per request. `$hints` DMs hinted items and
   `$groupcheck <slot>` DMs all queued items for a slot. There is no automatic
   push DM.
+- **Room port changes.** When archipelago.gg restarts a paused room on a new
+  port, the bot updates its own `config.json`, reports it in the debug channel,
+  and (via the `awepeeps-patches` branch) posts the new address in the
+  broadcast channel so players know where to reconnect.
 
 The bot identifies players by slot, so a second game on the same account is
 treated as someone else's items. Upstream: [bridgeipelago functionality](https://github.com/Quasky/bridgeipelago#functionality).
