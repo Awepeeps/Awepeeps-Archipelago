@@ -266,7 +266,25 @@ case-sensitive and lowercase. `$register` links your Discord account to a slot; 
 player commands act on your registered slot(s). Upstream reference:
 [bridgeipelago commands](https://github.com/Quasky/bridgeipelago#commands).
 
-Player commands:
+The `awepeeps-patches` bot also registers the player commands as native Discord
+slash commands in the server containing the configured broadcast channel. Type
+`/` and select Shamiko-Bot to browse them. The existing `$` commands continue to
+work. Slash commands enforce the same broadcast channel restriction; confirmations
+and `/help` are private, catch-up and registration lists arrive by DM, and charts
+and requested hints are posted in the broadcast channel.
+
+Use `/register slot:<exact slot name>`, `/groupcheck slot:<exact slot name>`,
+and `/hint slot:<exact slot name> item:<item name>` for commands with arguments.
+`/ketchmeup` has an optional filter with Everything (default), Useful and
+progression, and Progression only choices. The other player command names match
+the `$` versions below. Admin and configuration commands remain message-only.
+
+The bot determines the server ID from the broadcast channel and syncs its player
+command list once after connecting. It requires application-command authorization
+and members need permission to use application commands in that channel. No new
+bot token, public web endpoint, or room generation is needed.
+
+Player commands (`$` syntax; slash equivalents are available in Discord):
 
 | Command | Effect |
 |---------|--------|
