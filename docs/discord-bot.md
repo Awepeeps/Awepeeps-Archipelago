@@ -257,23 +257,31 @@ the bot polls room status to follow port changes, and wrong URLs break that.
    integration-managed role named after the bot with the selected permissions
    and auto-applies it on every server the bot joins. A managed role cannot be
    edited or assigned manually; the server owner only positions it.
-5. Create a broadcast channel and a private debug channel; enable Developer
-   Mode and copy both channel IDs and your own user ID.
+5. Choose a bot channel; enable Developer Mode and copy its channel ID and
+   your own user ID. A separate debug channel is optional.
+
+For Awepeeps, set both `DiscordBroadcastChannel` and `DiscordDebugChannel` to
+`1561407458973319288` (`#archipelago-notifications`) in the local `config.json`.
+All channel-based bot commands, AP notifications, and admin/debug alerts use
+that channel; `#archipelago` is reserved for human conversation. Keep credentials
+in the ignored local config; the tracked config template leaves channel IDs blank.
 
 To give an already-added bot a managed role, add the `bot` scope to the default
 install settings and re-add the bot (kick it, then invite it again). Re-adding
 does not change the token.
 
 **Channel permissions:** the bot's managed role needs `View Channel` and
-`Send Messages` in both the broadcast and debug channels. A staff-only channel
+`Send Messages` in every configured channel, plus `Attach Files` for charts.
+A staff-only channel
 that denies `Send Messages` makes the bot's `on_ready` fail with
 `403 Missing Access`, so use a bot-friendly debug channel (for example a
 `#bot-commands`) or add a channel overwrite for the managed role.
 
 ## Registration and commands
 
-Commands only work in the broadcast channel (#archipelago-gamers); the bot
-ignores messages everywhere else, including the debug channel. Commands are
+Commands only work in the broadcast channel (`#archipelago-notifications` for
+Awepeeps); the bot ignores messages everywhere else, including a separate debug
+channel if one is configured. Commands are
 case-sensitive and lowercase. `$register` links your Discord account to a slot; the other
 player commands act on your registered slot(s). Upstream reference:
 [bridgeipelago commands](https://github.com/Quasky/bridgeipelago#commands).
