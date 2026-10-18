@@ -111,6 +111,8 @@ Verified environment: WSL2 Ubuntu, Python 3.14.4, git 2.53, bridgeipelago
     debug channel; our patch also announces the new address in the broadcast
     channel so players know where to reconnect.
   - The `$help` command, which posts the player-command list in the channel.
+  - Optional connection announcements: `DiscordConfig.AnnounceConnection`
+    defaults to `false`, suppressing the repeated debug-channel startup message.
 
 The live clone's remotes follow this layout: `upstream` for
 Quasky/bridgeipelago, `awepeeps` for the org fork, and `origin` for the personal
@@ -311,6 +313,14 @@ who sent them, so anyone who can post in the broadcast channel can run them):
 | `$archinfo` | Debug details (only when `DebugMode` is on) |
 
 ## Notifications
+
+The `awepeeps-patches` bot suppresses the "Bot connected. Debug control - Online."
+message by default, including when `DiscordConfig.AnnounceConnection` is absent.
+Discord can fire `on_ready` again after reconnecting, which previously posted
+the same message each time. Set `AnnounceConnection` to `true` only to restore
+that behavior; this is an on/off setting, not a daily limit. Restart the bot
+after changing it. Other debug messages, errors, and room-port alerts keep
+their existing behavior.
 
 There are two separate paths with separate filters:
 
