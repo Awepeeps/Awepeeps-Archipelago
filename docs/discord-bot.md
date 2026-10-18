@@ -38,10 +38,11 @@ the season's player table.
 
 - `config.json` contains the Discord bot token and the room password. Never
   commit it, the token, the password, or the bot's data folders.
-- Keeping the clone **outside** this repository is the recommended layout, and
-  it is how this repository is run. The bot's data folders and `.venv` are
-  large, stateful, and per-install, so an external clone keeps them out of any
-  worktree.
+- Keep the canonical clone beside the other repositories under
+  `<workspace>/projects/repos/Awepeeps-bridgeipelago`, outside this repository.
+  Do not clone into a Windows or WSL home directory. Keep the Linux virtual
+  environment in `~/.local/share/bridgeipelago/venv`; it is runtime data, not
+  another source checkout.
 - A repo-local clone under the ignored `bridgeipelago/` path is recognized by
   [.worktreeinclude](../.worktreeinclude) so a worktree can run the bot without
   a re-clone. Only `bridgeipelago/config.json` is listed there; the clone's data
@@ -61,15 +62,16 @@ Native Windows is unsupported by bridgeipelago v3; use WSL2 (or Docker).
    PowerShell, then reboot and set the Linux user.
 2. Install prerequisites (skip any already present):
    `sudo apt update && sudo apt install -y git python3 python3-venv python3-pip`
-3. Clone our fork and check out the patched branch:
+3. Clone our fork; `main` contains the reviewed Awepeeps patches:
    ```bash
-   git clone https://github.com/Awepeeps/Awepeeps-bridgeipelago.git ~/bridgeipelago
-   cd ~/bridgeipelago
-   git checkout awepeeps-patches
-   python3 -m venv .venv
-   ./.venv/bin/python -m pip install --upgrade pip
-   ./.venv/bin/python -m pip install -r requirements.txt
-   ./.venv/bin/python -m pip install "websockets<14"   # newer versions break the receive loop
+   # Set this to the workspace root mounted in WSL.
+   workspace=/mnt/d/dev/deathpie
+   git clone https://github.com/Awepeeps/Awepeeps-bridgeipelago.git "$workspace/projects/repos/Awepeeps-bridgeipelago"
+   cd "$workspace/projects/repos/Awepeeps-bridgeipelago"
+   python3 -m venv ~/.local/share/bridgeipelago/venv
+   ~/.local/share/bridgeipelago/venv/bin/python -m pip install --upgrade pip
+   ~/.local/share/bridgeipelago/venv/bin/python -m pip install -r requirements.txt
+   ~/.local/share/bridgeipelago/venv/bin/python -m pip install "websockets<14"   # newer versions break the receive loop
    ```
 4. Create `config.json` from the shipped template, apply the `LanguageFile`
    fix, and fill the values (see Configuration).
@@ -77,7 +79,7 @@ Native Windows is unsupported by bridgeipelago v3; use WSL2 (or Docker).
    The wrapper forces the `fork` start method, which the bot needs on Python
    3.14 (see Run as a WSL service):
    ```bash
-   ./.venv/bin/python -u -c "import multiprocessing as m, runpy; m.set_start_method('fork'); runpy.run_path('bridgeipelago.py', run_name='__main__')" config.json
+   ~/.local/share/bridgeipelago/venv/bin/python -u -c "import multiprocessing as m, runpy; m.set_start_method('fork'); runpy.run_path('bridgeipelago.py', run_name='__main__')" config.json
    ```
 
 The clone lives outside this repository, so `config.json` and the data folders
@@ -97,14 +99,15 @@ Verified environment: WSL2 Ubuntu, Python 3.14.4, git 2.53, bridgeipelago
   and the personal fork is
   [deathpie/Awepeeps-bridgeipelago](https://github.com/deathpie/Awepeeps-bridgeipelago),
   made from the org fork, so all three share one fork network.
-- All of our changes live as commits on the `awepeeps-patches` branch, which is
-  based on the upstream release tag currently in use (`live-v3.0.1`, commit
-  `91a24ff`). Do not commit onto a tag or onto `main`.
+- `main` contains the reviewed Awepeeps changes. Keep the long-lived
+  `awepeeps-patches` branch for maintaining our deviations from the original
+  release (`live-v3.0.1`, commit `91a24ff`). Merge reviewed updates into `main`
+  and synchronize both owned forks; never publish changes to Quasky.
 - The branch is pushed to both forks, so `Awepeeps/Awepeeps-bridgeipelago` and
   `deathpie/Awepeeps-bridgeipelago` stay identical. Push it to both after every
   change.
-- To upgrade, rebase `awepeeps-patches` onto the new upstream tag and push it to
-  both forks (see Upgrading).
+- To upgrade, merge the original release tag into `awepeeps-patches`, verify
+  the result, and fast-forward `main` in both owned forks (see Upgrading).
 - Current patches on `awepeeps-patches`:
   - The port-change announcement: `CheckArchHost()` already detects a new
     archipelago.gg room port, updates `config.json`, and reports it to the
@@ -114,28 +117,35 @@ Verified environment: WSL2 Ubuntu, Python 3.14.4, git 2.53, bridgeipelago
   - Optional connection announcements: `DiscordConfig.AnnounceConnection`
     defaults to `false`, suppressing the repeated debug-channel startup message.
 
-The live clone's remotes follow this layout: `upstream` for
-Quasky/bridgeipelago, `awepeeps` for the org fork, and `origin` for the personal
-fork.
+The live clone's remotes follow this layout: `origin` for the personal fork,
+`upstream` for the Awepeeps org fork, and `quasky` for the original
+Quasky/bridgeipelago project. Fetch original release tags from `quasky` when
+upgrading; publish our patches to `upstream` and `origin`.
 
 ### Upgrading
 
-Because the clone runs `awepeeps-patches`, an upgrade rebases our patches onto
-the new upstream release tag instead of checking the tag out. Stop the service
-first so the bot does not run against a tree that changes underneath it:
+Maintain original-project upgrades on `awepeeps-patches`, then fast-forward
+`main` after verification. Stop the service first so the bot does not run
+against a tree that changes underneath it:
 
 ```bash
 systemctl --user stop bridgeipelago
-git fetch upstream --tags
-git rebase <new-upstream-tag>    # for example live-v3.0.2
-./.venv/bin/python -m pip install -r requirements.txt
-git push --force-with-lease awepeeps awepeeps-patches
-git push --force-with-lease origin awepeeps-patches
+git fetch quasky --tags
+git switch awepeeps-patches
+git merge <new-upstream-tag>    # for example live-v3.0.2
+~/.local/share/bridgeipelago/venv/bin/python -m pip install -r requirements.txt
+~/.local/share/bridgeipelago/venv/bin/python -m unittest discover
+git push upstream awepeeps-patches
+git push origin awepeeps-patches
+git switch main
+git merge --ff-only awepeeps-patches
+git push upstream main
+git push origin main
 systemctl --user start bridgeipelago
 ```
 
-A rebase rewrites the branch, so both pushes need `--force-with-lease`. After a
-plain new commit (no rebase), push normally to both forks.
+This preserves existing history and uses ordinary pushes to both owned forks.
+Keep local `main` tracking `origin/main`; `quasky` is a read-only source.
 
 `config.json` is unchanged from v3.0.0, so no migration is needed.
 
@@ -145,7 +155,7 @@ With systemd enabled in WSL, run the bot as a user service so it starts on boot
 and restarts on failure.
 
 Create `~/.config/systemd/user/bridgeipelago.service` (replace `<user>` with the
-Linux username):
+Linux username and `<workspace>` with `deathpie` or the owning workspace):
 
 ```ini
 [Unit]
@@ -155,12 +165,12 @@ Wants=network-online.target
 
 [Service]
 Type=simple
-WorkingDirectory=/home/<user>/bridgeipelago
-ExecStart=/home/<user>/bridgeipelago/.venv/bin/python -u -c "import multiprocessing as m, runpy; m.set_start_method('fork'); runpy.run_path('bridgeipelago.py', run_name='__main__')" config.json
+WorkingDirectory=/mnt/d/dev/<workspace>/projects/repos/Awepeeps-bridgeipelago
+ExecStart=/home/<user>/.local/share/bridgeipelago/venv/bin/python -u -c "import multiprocessing as m, runpy; m.set_start_method('fork'); runpy.run_path('bridgeipelago.py', run_name='__main__')" config.json
 Restart=on-failure
 RestartSec=10
-StandardOutput=append:/home/<user>/bridgeipelago/bot.out
-StandardError=append:/home/<user>/bridgeipelago/bot.out
+StandardOutput=append:/mnt/d/dev/<workspace>/projects/repos/Awepeeps-bridgeipelago/bot.out
+StandardError=append:/mnt/d/dev/<workspace>/projects/repos/Awepeeps-bridgeipelago/bot.out
 
 [Install]
 WantedBy=default.target
@@ -182,7 +192,7 @@ systemctl --user status bridgeipelago
 ```
 
 Logs go to `journalctl --user -u bridgeipelago -f` and the appended
-`~/bridgeipelago/bot.out`. Stop or restart with
+`<workspace>/projects/repos/Awepeeps-bridgeipelago/bot.out`. Stop or restart with
 `systemctl --user stop|restart bridgeipelago`.
 
 ## Docker alternative
