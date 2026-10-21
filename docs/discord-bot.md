@@ -277,6 +277,31 @@ that denies `Send Messages` makes the bot's `on_ready` fail with
 `403 Missing Access`, so use a bot-friendly debug channel (for example a
 `#bot-commands`) or add a channel overwrite for the managed role.
 
+## Daily status reports
+
+The `awepeeps-patches` bot can automatically post the same outputs as
+`/deathcount` and `/checkgraph` in the configured broadcast channel. Add this
+top-level section to the ignored local `config.json` to enable midnight reports:
+
+```json
+"DailyPostConfig": {
+    "Enabled": true,
+    "Time": "00:00",
+    "Timezone": "America/New_York"
+}
+```
+
+Restart the bot after changing these settings. `Time` uses 24-hour `HH:MM`;
+`Timezone` is an IANA timezone and follows daylight saving changes. The template
+defaults to disabled. Startup waits for the next scheduled time rather than
+posting missed reports. If the running computer is suspended across the scheduled
+time, it may deliver that report once on resume. Failed reports are logged and
+the next scheduled attempt is the following day. The bot records the last
+successful report date under the session's
+ignored log directory to prevent duplicate daily posts after reconnects or restarts.
+The death tally includes observed DeathLink events; the graph uses the existing
+web tracker and remains unavailable with `SelfHostNoWeb` enabled.
+
 ## Registration and commands
 
 Commands only work in the broadcast channel (`#archipelago-notifications` for
