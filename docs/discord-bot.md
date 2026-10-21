@@ -209,8 +209,10 @@ pre-sets the recommended defaults, or from the `config.json.template` that ships
 with the release you clone and apply the same values. The template and the code
 have drifted historically, so do not hand-copy keys from the README.
 
-Recommended defaults: `ItemFilterConfig.BotItemFilterLevel` `1` (progression +
-useful in the channel feed), `ItemFilterConfig.BotItemSpoilTraps` `false`,
+Our session uses `ItemFilterConfig.BotItemFilterLevel` `2` (progression only
+in the channel feed), saved in the ignored local `config.json` and provided
+as the default in this repository's config template.
+Other recommended defaults: `ItemFilterConfig.BotItemSpoilTraps` `false`,
 `AdvancedConfig.SnoozeCompletedGames` `true` (skip checks from finished games),
 and `MetaConfig.LanguageFile` `en`.
 
@@ -280,7 +282,8 @@ that denies `Send Messages` makes the bot's `on_ready` fail with
 ## Daily status reports
 
 The `awepeeps-patches` bot can automatically post the same outputs as
-`/deathcount` and `/checkgraph` in the configured broadcast channel. Add this
+`/checkcount`, then `/checkgraph`, then `/deathcount` in the configured broadcast
+channel. Add this
 top-level section to the ignored local `config.json` to enable midnight reports:
 
 ```json
@@ -365,10 +368,16 @@ that behavior; this is an on/off setting, not a daily limit. Restart the bot
 after changing it. Other debug messages, errors, and room-port alerts keep
 their existing behavior.
 
+A WebSocket disconnect does not prove the room is asleep. Brief reconnects stay
+quiet. After a going-away close followed by at least 60 seconds of refused
+reconnects, the bot posts one connection-unavailable notice and a matching
+restored notice after reconnection. The room link stays wrapped in angle
+brackets so Discord does not fetch a preview that could wake the room.
+
 There are two separate paths with separate filters:
 
-- **Channel feed (not per-user, not opt-in).** Every check and item event is
-  posted to the broadcast channel. The host sets the level in `config.json`
+- **Channel feed (not per-user, not opt-in).** Item events matching the configured
+  filter are posted to the broadcast channel. The host sets the level in `config.json`
   with `ItemFilterConfig.BotItemFilterLevel`: `2` progression only, `1`
   progression + useful, `0` progression + useful + normal (traps only when
   `BotItemSpoilTraps` is true). `AdvancedConfig.SnoozeCompletedGames` skips

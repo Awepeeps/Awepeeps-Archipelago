@@ -22,7 +22,7 @@
     },
     "ItemFilterConfig": {
         "BotItemSpoilTraps": false,
-        "BotItemFilterLevel": 1
+        "BotItemFilterLevel": 2
     },
     "RelayConfig": {
         "ChatMessages": true,
