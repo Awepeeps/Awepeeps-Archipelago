@@ -374,6 +374,21 @@ reconnects, the bot posts one connection-unavailable notice and a matching
 restored notice after reconnection. The room link stays wrapped in angle
 brackets so Discord does not fetch a preview that could wake the room.
 
+Both notices can be customized independently in the local `config.json`,
+including their emojis:
+
+```json
+"NotificationConfig": {
+    "ConnectionUnavailableMessage": "💤 The Archipelago room may be asleep. Open {room_url} to wake it up.",
+    "ConnectionRestoredMessage": "☀️ The Archipelago room is reachable again at **{server_address}**."
+}
+```
+
+`{room_url}` inserts the current room link with preview-suppressing angle
+brackets already included. `{server_address}` inserts the current host and port.
+The bot's built-in fallback text is basic and has no emojis; missing, blank,
+or invalid overrides use that fallback. Restart the bot after editing config.
+
 There are two separate paths with separate filters:
 
 - **Channel feed (not per-user, not opt-in).** Item events matching the configured

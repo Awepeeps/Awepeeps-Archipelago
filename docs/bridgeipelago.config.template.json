@@ -6,6 +6,10 @@
         "DiscordDebugChannel": "",
         "AnnounceConnection": false
     },
+    "NotificationConfig": {
+        "ConnectionUnavailableMessage": "💤 The Archipelago room may be asleep. Open {room_url} to wake it up.",
+        "ConnectionRestoredMessage": "☀️ The Archipelago room is reachable again at **{server_address}**."
+    },
     "DailyPostConfig": {
         "Enabled": false,
         "Time": "00:00",
