@@ -366,6 +366,69 @@ ignored log directory to prevent duplicate daily posts after reconnects or resta
 The death tally includes observed DeathLink events; the graph uses the existing
 web tracker and remains unavailable with `SelfHostNoWeb` enabled.
 
+## Command availability
+
+Our `awepeeps-patches` branch supports independent switches for message and
+slash commands. Merge this section into the ignored local `config.json` and
+restart the bot:
+
+```json
+"CommandConfig": {
+    "PrefixCommandsEnabled": true,
+    "SlashCommandsEnabled": true
+}
+```
+
+Both default to `true`. Use JSON booleans, not strings. Setting
+`PrefixCommandsEnabled` to `false` disables `$` commands, including message-only
+admin commands. Keep it enabled if you need those commands. Setting
+`SlashCommandsEnabled` to `false` disables player slash commands and removes
+them from the configured server on the next successful command sync. The bot
+continues relaying notifications with either or both command styles disabled.
+
+## Opt-in item pings and watches
+
+Our `awepeeps-patches` branch adds item watches and optional pings to the
+existing registration and catch-up features. Merge
+`"ItemMentionsEnabled": true` into the local `NotificationConfig` section and
+restart to permit pings. The tracked templates default to `false`. A global
+toggle alone never opts players in.
+
+After registering for their slot, each player chooses one of:
+
+- `/notify mode:all` or `$notify all`: ping for items sent to their registered
+  slots, including self-found items when those are posted.
+- `/notify mode:watched` or `$notify watched`: ping only for watched items.
+- `/notify mode:off` or `$notify off`: stop pings.
+
+Use `/watch slot:deathpie item:Mikiri Counter` or
+`$watch deathpie | Mikiri Counter` to watch an item without spending hint
+points or revealing its location. `/watches` (`$watches`) lists pending watches;
+`/unwatch slot:deathpie item:Mikiri Counter`
+(`$unwatch deathpie | Mikiri Counter`) removes one. Use the exact slot and item
+names; matching ignores case. The item must exist in that slot's game, and
+you must be registered for the slot. A Discord `/hint` or `$hint` request also
+adds a watch for a recognized item in your registered slot. It does not opt
+you into pings, and requesting the hint still has the normal hint cost.
+The watch is added when the Discord request is queued, even if the server
+later declines the hint. Hints requested in game clients do not create a
+personal watch; use `/watch` for those.
+
+Watches respect the configured progression filter, trap spoiler settings, and
+finished-player suppression. A filtered item produces no post or ping; its
+observed arrival still completes the watch. Pings attach to the existing item
+post instead of creating a second notification.
+
+Watches mean the next observed matching copy, not an item quantity or a search
+of previously received items. Preferences persist per Discord user ID and
+session `UniqueID`. Multiple registrants of one slot have independent choices.
+Clearing registrations also removes consent and watches. Hint announcements
+and chat relays continue to suppress mentions; item pings only allow the
+specific consenting users and never enable role or everyone mentions.
+
+See the fork's [item pings and watches reference](https://github.com/Awepeeps/Awepeeps-bridgeipelago/blob/awepeeps-patches/docs/item-watches.md)
+for delivery and storage details.
+
 ## Registration and commands
 
 Commands only work in the broadcast channel (`#archipelago-notifications` for
