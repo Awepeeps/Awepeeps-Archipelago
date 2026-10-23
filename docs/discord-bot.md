@@ -348,8 +348,10 @@ Player commands (`$` syntax; slash equivalents are available in Discord):
 | `$checkcount` | Post the current check counts |
 | `$checkgraph` | Post a check-progress graph image |
 
-Admin commands (upstream calls these admin-only, but the bot does not check
-who sent them, so anyone who can post in the broadcast channel can run them):
+Bot maintenance commands (these affect the bot, not the Archipelago room).
+For room administration, see the [Admin guide](admin-guide.md). Upstream calls
+these commands admin-only, but the bot does not check who sent them, so anyone
+who can post in the broadcast channel can run them:
 
 | Command | Effect |
 |---------|--------|
