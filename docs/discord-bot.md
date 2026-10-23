@@ -279,6 +279,36 @@ that denies `Send Messages` makes the bot's `on_ready` fail with
 `403 Missing Access`, so use a bot-friendly debug channel (for example a
 `#bot-commands`) or add a channel overwrite for the managed role.
 
+## Hint result announcements
+
+Set `RelayConfig.HintMessages` to `true` in the bot's local `config.json` to
+announce newly revealed hints in the configured broadcast channel, including
+hints requested through game clients. Our community template enables this;
+the generic bot template defaults to disabled. Restart after changing config.
+
+This relays the actual result: whose item it is, the item name, its location,
+whose world contains it, and its hint status. It does not request additional
+hints or spend points. A player's `/hint` request through Discord still uses
+the normal server hint cost; `/hints` only lists existing hints by DM.
+
+The initial snapshot records existing hints silently, including any hint
+revealed before that snapshot arrives. Announced hints are remembered per
+session to suppress duplicates across reconnects, restarts, and overlapping
+player hint lists. A crash after Discord accepts a message but before its
+acknowledgement is saved can cause a repeated announcement. Hints are separate
+from progression-only item filtering and finished-player item suppression.
+
+`APClientHint` and `APClientHintLocation` only echo command text; they are not
+needed for result announcements and remain disabled in our template.
+
+`NotificationConfig.HintMessage` overrides the complete hint announcement,
+including emojis. Supported placeholders are `{receiver}`, `{item}`,
+`{location}`, `{finder}`, `{status}`, and `{entrance}`. The entrance placeholder
+is empty when absent, otherwise it includes an ` Entrance: ` prefix. Missing or
+blank overrides use a plain built-in message. See the fork's
+[hint result reference](https://github.com/Awepeeps/Awepeeps-bridgeipelago/blob/awepeeps-patches/docs/hint-notifications.md)
+for the startup baseline, persistence, and duplicate-handling details.
+
 ## Daily status reports
 
 The `awepeeps-patches` bot can automatically post the same outputs as
