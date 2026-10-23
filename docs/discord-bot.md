@@ -486,9 +486,15 @@ including their emojis:
 ```json
 "NotificationConfig": {
     "ConnectionUnavailableMessage": "💤 The Archipelago room may be asleep. Open {room_url} to wake it up.",
-    "ConnectionRestoredMessage": "☀️ The Archipelago room is reachable again at **{server_address}**."
+    "ConnectionRestoredMessage": "☀️ The Archipelago room is reachable again at **{server_address}**.",
+    "SleepWakeEditWindowMinutes": 15
 }
 ```
+
+If the room is reachable again within `SleepWakeEditWindowMinutes` (default
+15) of the unavailable notice, the bot edits that notice into the restored
+message instead of posting a second one. Set it to `0` to always post a new
+message.
 
 `{room_url}` inserts the current room link with preview-suppressing angle
 brackets already included. `{server_address}` inserts the current host and port.
