@@ -213,7 +213,7 @@ Our session uses `ItemFilterConfig.BotItemFilterLevel` `2` (progression only
 in the channel feed), saved in the ignored local `config.json` and provided
 as the default in this repository's config template.
 Other recommended defaults: `ItemFilterConfig.BotItemSpoilTraps` `false`,
-`AdvancedConfig.SnoozeCompletedGames` `true` (skip checks from finished games),
+`AdvancedConfig.SnoozeCompletedGames` `true` (suppress item posts to finished recipients),
 and `MetaConfig.LanguageFile` `en`.
 
 | Section | Keys to set |
@@ -391,6 +391,16 @@ brackets already included. `{server_address}` inserts the current host and port.
 The bot's built-in fallback text is basic and has no emojis; missing, blank,
 or invalid overrides use that fallback. Restart the bot after editing config.
 
+Item flags and bot filter levels are different numbers. Server item flags are
+`0` filler, `1` progression, `2` useful, and `4` trap; they can combine, such as
+`3` for progression + useful. Our filter **level** `2` accepts items with the
+progression bit set, not items whose flag equals `2`. Pure traps (`4`) are
+disabled by our `BotItemSpoilTraps: false` setting. These preferences are saved
+in the ignored local `config.json` and survive restarts; the community template
+provides the same defaults. For combined flags, trap handling, and the Spirit
+Light example, see the fork's
+[item notification reference](https://github.com/Awepeeps/Awepeeps-bridgeipelago/blob/awepeeps-patches/docs/item-notifications.md).
+
 There are two separate paths with separate filters:
 
 - **Channel feed (not per-user, not opt-in).** Item events matching the configured
@@ -398,7 +408,8 @@ There are two separate paths with separate filters:
   with `ItemFilterConfig.BotItemFilterLevel`: `2` progression only, `1`
   progression + useful, `0` progression + useful + normal (traps only when
   `BotItemSpoilTraps` is true). `AdvancedConfig.SnoozeCompletedGames` skips
-  checks from games that have already finished. Players cannot change this.
+  posts to recipients who have already finished, regardless of the sender's
+  completion status. Players cannot change this host setting.
 - **Personal DMs (opt-in).** `$register <slot>` links a Discord account to a
   slot and starts queuing items **other players send to you**; your own finds
   are not queued (you see those in-game). Pull them with `$ketchmeup <2|1|0>`,
