@@ -36,7 +36,9 @@ In Discord's `#archipelago-notifications`, Shamiko-Bot also offers:
 - `/register slot:<your exact slot name>` to link your player slot first.
 - `/hints` to DM existing hints for your registered slots.
 - `/hint slot:<slot name> item:<item name>` to request an item hint through
-  the bot; requested hints are posted in the channel.
+  the bot. The bot posts a public note naming you and the request (without
+  pinging anyone), and posts the result in the channel when the server reveals
+  it, if the host relays hint results.
 
 The Discord commands and client chat commands use different syntax. See
 [Discord command details](discord-bot.md#registration-and-commands) for setup
