@@ -406,7 +406,10 @@ channel naming the requester, the slot, and the item (for example
 `Player A requested a hint for Slot B: Item Name`), including for
 `/hint`. Requests remain auditable next to their announced results, and
 Discord mentions are suppressed in that acknowledgement. The slot and item
-names are each limited to 100 characters.
+names are each limited to 100 characters. A hint spends the slot's own hint
+points, so `$hint` and `/hint` only accept a slot the requester has
+registered for with `$register`; server admins can request any slot. A bare
+`$hint` replies with the usage.
 
 The `awepeeps-patches` bot also registers the player commands as native Discord
 slash commands in the server containing the configured broadcast channel. Type
@@ -437,7 +440,7 @@ Player commands (`$` syntax; slash equivalents are available in Discord):
 | `$ketchmeup <2\|1\|0>` | DM checks you missed: `2` progression, `1` +useful, `0` +normal |
 | `$groupcheck <slot>` | DM all queued checks for a slot (group games) |
 | `$hints` | DM hinted items for your registered slots |
-| `$hint <slot> \| <item>` | Request a hint; the result is relayed to the channel |
+| `$hint <slot> \| <item>` | Request a hint for a slot you're registered to; the result is relayed to the channel |
 | `$deathcount` | Post the current DeathLink tally |
 | `$checkcount` | Post the current check counts |
 | `$checkgraph` | Post a check-progress graph image |
