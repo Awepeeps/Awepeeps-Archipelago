@@ -113,9 +113,17 @@ Verified environment: WSL2 Ubuntu, Python 3.14.4, git 2.53, bridgeipelago
     archipelago.gg room port, updates `config.json`, and reports it to the
     debug channel; our patch also announces the new address in the broadcast
     channel so players know where to reconnect.
+  - Debounced host-status failures: the room-status request is validated and
+    runs off Discord's event loop; the alert fires once after five consecutive
+    failed checks, and the next valid check after it posts a recovery notice.
   - The `$help` command, which posts the player-command list in the channel.
   - Optional connection announcements: `DiscordConfig.AnnounceConnection`
     defaults to `false`, suppressing the repeated debug-channel startup message.
+  - Hint result announcements: newly revealed hints are relayed to the
+    broadcast channel with durable dedupe, restart-preserving pending
+    deliveries, bounded retries, and a persisted deadletter list
+    (see Hint result announcements and the fork's
+    [hint result reference](https://github.com/Awepeeps/Awepeeps-bridgeipelago/blob/awepeeps-patches/docs/hint-notifications.md)).
 
 The live clone's remotes follow this layout: `origin` for the personal fork,
 `upstream` for the Awepeeps org fork, and `quasky` for the original
@@ -244,6 +252,11 @@ PY
 `ArchipelagoServerURL` and `ArchipelagoTrackerURL` must be the real room URLs;
 the bot polls room status to follow port changes, and wrong URLs break that.
 
+`DiscordAlertUserID` takes a **user ID**, or `&<role id>` to mention a role:
+the bot builds `<@ID>` for users and `<@&ID>` for roles, so the `&` character
+must come first for group IDs. Any other value is reported in the bot's error
+log and produces no working mention.
+
 ## Discord application
 
 1. Discord Developer Portal -> New Application (or reuse an existing bot).
@@ -278,6 +291,54 @@ A staff-only channel
 that denies `Send Messages` makes the bot's `on_ready` fail with
 `403 Missing Access`, so use a bot-friendly debug channel (for example a
 `#bot-commands`) or add a channel overwrite for the managed role.
+
+## Hint result announcements
+
+Set `RelayConfig.HintMessages` to `true` in the bot's local `config.json` to
+announce newly revealed hints in the configured broadcast channel, including
+hints requested through game clients. Our community template enables this;
+the generic bot template defaults to disabled. Restart after changing config.
+
+This relays the actual result: whose item it is, the item name, its location,
+whose world contains it, and its hint status. It does not request additional
+hints or spend points. A player's `/hint` request through Discord still uses
+the normal server hint cost; `/hints` only lists existing hints by DM.
+
+The initial snapshot records existing hints silently, including any hint
+revealed before that snapshot arrives. Announced hints are remembered durably
+to suppress duplicates across reconnects, restarts, and overlapping
+player hint lists. Hints are separate from progression-only item filtering and
+finished-player item suppression.
+
+Restarting the bot does not drop pending announcements. Unsent results are
+persisted and reloaded on the first chat-loop pass after the Discord process
+starts, even before the tracker reconnects. A crash after Discord accepts a
+message but before its acknowledgement is saved can cause one repeated
+announcement. If the state file cannot be written, the same result can be sent
+on later passes until the write succeeds.
+
+Delivery isolates each result, so a bad message cannot block later ones. A
+failed send is retried on later passes with exponential backoff: five attempts
+in total, waiting 2, 4, 8, and 16 seconds between them. A result that keeps
+failing for about 30 seconds moves to a persisted deadletter list. Results
+Discord permanently rejects (HTTP 400/403) move there at once. A deadlettered
+result is not retried afterwards and does not come back on restart. These retry
+limits are fixed in code, not read from `config.json`. Failures are logged as
+short summaries without the message payload. Rendered result text is capped at
+Discord's 2000-character message limit, literal `@` characters are escaped
+before sending, and hint posts suppress Discord mentions: an announced result
+never pings anyone.
+
+`APClientHint` and `APClientHintLocation` only echo command text; they are not
+needed for result announcements and remain disabled in our template.
+
+`NotificationConfig.HintMessage` overrides the complete hint announcement,
+including emojis. Supported placeholders are `{receiver}`, `{item}`,
+`{location}`, `{finder}`, `{status}`, and `{entrance}`. The entrance placeholder
+is empty when absent, otherwise it includes an ` Entrance: ` prefix. Missing or
+blank overrides use a plain built-in message. See the fork's
+[hint result reference](https://github.com/Awepeeps/Awepeeps-bridgeipelago/blob/awepeeps-patches/docs/hint-notifications.md)
+for the startup baseline, persistence, and duplicate-handling details.
 
 ## Daily status reports
 
@@ -314,6 +375,39 @@ case-sensitive and lowercase. `$register` links your Discord account to a slot; 
 player commands act on your registered slot(s). Upstream reference:
 [bridgeipelago commands](https://github.com/Quasky/bridgeipelago#commands).
 
+Registration is a subscription, not ownership: more than one Discord account
+can register the same slot. Registrations are tracked per Discord account while
+item notifications queue in one shared per-slot list. `$ketchmeup` keeps a
+saved per-account position in that list (one cursor file per Discord account
+in the bot's registration data), so catching up only sends each account the
+items it has not received yet: one registrant's catch-up no longer consumes
+another registrant's pending items, and repeated `$ketchmeup` requests only
+send items added since that account's last catch-up. `$groupcheck` still shows
+the slot's full stored queue regardless of any account's position.
+
+For a slot with no saved position, the first catch-up after registering starts
+at the queue's length when the account registered, so older history is not
+replayed. Accounts registered before this change have no saved position, so
+their first catch-up sends everything still in that slot's queue file.
+`$clearreg` removes the registration list but keeps saved positions, so
+registering the same slot again resumes where that account left off. Catch-up
+does not delete queue files, so they keep growing, and `$groupcheck` sends the
+whole file each time.
+
+Two `` requests sent at the same moment by one account run one after
+the other, so items are not sent twice. A bare `` (or `/register`
+with a blank slot) replies with usage instead of registering anything. Slot
+names with characters Windows does not allow in file names (such as `:`) or
+device names such as `CON` now register normally; the bot stores their queue
+under an encoded file name.
+
+A Discord hint request now also gets a public acknowledgement in the broadcast
+channel naming the requester, the slot, and the item (for example
+`Player A requested a hint for Slot B: Item Name`), including for
+`/hint`. Requests remain auditable next to their announced results, and
+Discord mentions are suppressed in that acknowledgement. The slot and item
+names are each limited to 100 characters.
+
 The `awepeeps-patches` bot also registers the player commands as native Discord
 slash commands in the server containing the configured broadcast channel. Type
 `/` and select Shamiko-Bot to browse them. The existing `$` commands continue to
@@ -349,16 +443,23 @@ Player commands (`$` syntax; slash equivalents are available in Discord):
 | `$checkgraph` | Post a check-progress graph image |
 
 Bot maintenance commands (these affect the bot, not the Archipelago room).
-For room administration, see the [Admin guide](admin-guide.md). Upstream calls
-these commands admin-only, but the bot does not check who sent them, so anyone
-who can post in the broadcast channel can run them:
+For room administration, see the [Admin guide](admin-guide.md). Upstream describes
+these commands as admin-only. This Awepeeps bot enforces that as listed below:
 
 | Command | Effect |
 |---------|--------|
-| `$hello`, `$iloveyou` | Trivial responses |
-| `$reloadtracker`, `$reloaddiscord` | Reload the tracker or the Discord client |
-| `$setconfig <key> <value>` | Change a `config.json` value (`ArchipelagoPort`, URLs, `UniqueID`) |
-| `$archinfo` | Debug details (only when `DebugMode` is on) |
+| `$hello`, `$iloveyou` | Trivial responses; not gated |
+| `$reloadtracker`, `$reloaddiscord` | Reload the tracker or the Discord client (admin only) |
+| `$setconfig <key> <value>` | Change a `config.json` value (`ArchipelagoPort`, `ArchipelagoPassword`, URLs, `UniqueID`). Admin only |
+| `$archinfo` | Debug details (admin only, and only when `DebugMode` is on; secret-named values print as `<redacted>`) |
+
+Admin means a server member with **Administrator** or **Manage Server**
+permission. The bot reads that from Discord, not from the message text, and
+other members get a refusal. `$setconfig` never echoes a password, token, or
+secret back to the channel. If the room password was ever typed in the
+channel, rotate it on the room. `UniqueID` values containing path separators or
+control characters are rejected. Bot commands are only read in the broadcast
+channel.
 
 ## Notifications
 
@@ -390,6 +491,18 @@ including their emojis:
 brackets already included. `{server_address}` inserts the current host and port.
 The bot's built-in fallback text is basic and has no emojis; missing, blank,
 or invalid overrides use that fallback. Restart the bot after editing config.
+The emoji prefixes in shipped templates are examples; the built-in fallbacks
+are plain text without emojis.
+
+The room-status poll behind the port-change announcements is also debounced.
+The poll runs once per minute on a timer, and its HTTP request runs off
+Discord's event loop with a 10-second timeout. Every response is validated:
+the HTTP status is checked and `last_port` must be an integer from 1 to 65535.
+A bad response never updates the port; it counts as a failed check. One
+debug-channel alert goes out after 5 consecutive failed checks (with the alert
+user mention from `DiscordAlertUserID`, when set); repeat failures stay quiet.
+After an alert has gone out, the next valid check posts a recovery notice. Every
+valid check clears the failure count.
 
 Item flags and bot filter levels are different numbers. Server item flags are
 `0` filler, `1` progression, `2` useful, and `4` trap; they can combine, such as
@@ -443,7 +556,7 @@ appended to `logs/<UniqueID>/DeathLog.txt`, which backs `$deathcount` and
 
 ## Room or port changes
 
-Use `$setconfig <key> <value>` for `ArchipelagoPort`,
+Use `$setconfig <key> <value>` (admin only) for `ArchipelagoPort`,
 `ArchipelagoTrackerURL`, `ArchipelagoServerURL`, and `UniqueID`, then
 `$reloadtracker` and `$reloaddiscord`. Bring the room up first so the bot can
 connect during the reload.

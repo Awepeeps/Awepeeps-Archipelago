@@ -7,6 +7,7 @@
         "AnnounceConnection": false
     },
     "NotificationConfig": {
+        "HintMessage": "💡 {receiver}'s **{item}** is at **{location}** in **{finder}'s world**. ({status}){entrance}",
         "ConnectionUnavailableMessage": "💤 The Archipelago room may be asleep. Open {room_url} to wake it up.",
         "ConnectionRestoredMessage": "☀️ The Archipelago room is reachable again at **{server_address}**."
     },
@@ -29,6 +30,7 @@
         "BotItemFilterLevel": 2
     },
     "RelayConfig": {
+        "HintMessages": true,
         "ChatMessages": true,
         "ServerChatMessages": true,
         "GoalMessages": true,
