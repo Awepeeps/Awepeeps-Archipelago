@@ -2,6 +2,12 @@
 
 This repository organizes Archipelago multiworld configurations, setup references, and session records for the Awepeeps community.
 
+## Player guide
+
+See the [Player guide](docs/player-guide.md) for our default settings, hint commands, how to
+release and collect items after finishing your game, and the corresponding admin
+server commands.
+
 ## Repository layout
 
 - `2026/<number>. <Season>/`: one folder per session season.
