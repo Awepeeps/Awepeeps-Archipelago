@@ -16,6 +16,32 @@ in the running room.
   `#archipelago-notifications`. The midnight Eastern report posts check counts,
   the progress graph, then the DeathLink tally. See [Discord bot settings](discord-bot.md).
 
+## Players: hints during your run
+
+While connected to your own player slot, send these in your game's
+**Archipelago client chat** (or the Archipelago Text Client):
+
+- `!hint` lists your existing hints, available hint points, and the current
+  cost. Use this first to check your balance.
+- `!hint <item name>` requests a hint showing which world and location hold
+  an item for you. Replace `<item name>` with the actual item name.
+- `!hint_location <location name>` requests a hint about the item at a
+  particular location in your world.
+
+New hints spend points earned by checking locations; our default cost is
+described above. You can use hints while playing, before completing your goal.
+
+In Discord's `#archipelago-notifications`, Shamiko-Bot also offers:
+
+- `/register slot:<your exact slot name>` to link your player slot first.
+- `/hints` to DM existing hints for your registered slots.
+- `/hint slot:<slot name> item:<item name>` to request an item hint through
+  the bot; requested hints are posted in the channel.
+
+The Discord commands and client chat commands use different syntax. See
+[Discord command details](discord-bot.md#registration-and-commands) for setup
+and the full list.
+
 ## Players: release and collect after your goal
 
 Stay connected to your own slot and send these commands in your game's

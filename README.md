@@ -4,7 +4,7 @@ This repository organizes Archipelago multiworld configurations, setup reference
 
 ## Player guide
 
-See the [Player guide](docs/player-guide.md) for our default settings, how to
+See the [Player guide](docs/player-guide.md) for our default settings, hint commands, how to
 release and collect items after finishing your game, and the corresponding admin
 server commands.
 
