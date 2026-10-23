@@ -62,24 +62,8 @@ For example, after chickensalad's goal is registered, chickensalad can send
 commands take no player-name argument. Release and collect are separate actions;
 doing one does not automatically do the other.
 
-## Admins: release or collect for a player
+Room administrators: see the [Admin guide](admin-guide.md) for server-console
+commands, including release and collect for named players.
 
-Use the room's **server command console**, accessible to its owner on
-archipelago.gg, or the console of a self-hosted Archipelago server. Enter one
-command at a time, using the player's slot name:
-
-```text
-/release chickensalad
-/collect chickensalad
-```
-
-`/release` sends the remaining items from chickensalad's world to their owners;
-`/collect` sends chickensalad their remaining items from across the multiworld.
-These act directly on the named slot; in particular, admin `/release` can
-bypass the player's goal restriction. Confirm the intended player and their
-readiness before running either command. These are server-console commands,
-not Discord commands or commands to paste into a player's client console.
-
-For the full command reference, see the
+For the full player command reference, see the
 [official Archipelago command guide](https://archipelago.gg/tutorial/Archipelago/commands_en).
-

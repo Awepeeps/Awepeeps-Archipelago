@@ -2,11 +2,14 @@
 
 This repository organizes Archipelago multiworld configurations, setup references, and session records for the Awepeeps community.
 
-## Player guide
+## Guides
 
-See the [Player guide](docs/player-guide.md) for our default settings, hint commands, how to
-release and collect items after finishing your game, and the corresponding admin
-server commands.
+- [Player guide](docs/player-guide.md): community defaults, hints, and player commands.
+- [Admin guide](docs/admin-guide.md): room-console commands and live-room operations.
+- [Session workflow](docs/session-workflow.md): prepare, generate, host, and archive a session.
+- [Discord bot](docs/discord-bot.md): operate the optional tracking bot; bot maintenance commands do not administer the Archipelago room.
+- [Archipelago resources](Archipelago.md): upstream setup and community links.
+- [Agent workflows](docs/agent-workflows.md) and [Git workflow](docs/git-workflow.md): repository maintenance.
 
 ## Repository layout
 
