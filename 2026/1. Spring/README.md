@@ -1,0 +1,26 @@
+# Spring 2026 Games
+
+> **Status:** Inactive — archived and read-only. Do not modify this file via automated edits; changes must be made manually by repository maintainers.
+
+## Run Dates
+
+- **Start:** March 21, 2026 — 7:00 PM Eastern
+- **End:** April 7, 2026 — 7:36 PM Eastern
+
+## Session Links
+
+- **Google Sheet**: [https://docs.google.com/spreadsheets/d/1BlnBHy-FUT1G1OdmJQVLoXQSMxGA3aAajki1QENhC2E/edit?gid=0#gid=0](https://docs.google.com/spreadsheets/d/1BlnBHy-FUT1G1OdmJQVLoXQSMxGA3aAajki1QENhC2E/edit?gid=0#gid=0)
+- **Archipelago Room**: [https://archipelago.gg/room/0GhzlOPTSqeMmI3H92h9pQ](https://archipelago.gg/room/0GhzlOPTSqeMmI3H92h9pQ)
+- **YAML Configurations**: [YAML/](YAML/)
+- **APWorld Files**: [APWorld/](APWorld/)
+- **Secrets and Spoilers**: [.secrets/](.secrets/)
+
+| Game | Info | Setup Guide | APWorld | PopTracker | Misc. |
+|------|------|-------------|---------|------------|-------|
+| Dark Souls III | [Dark Souls III Info](https://archipelago.gg/games/Dark%20Souls%20III/info/en) | [Dark Souls III Setup Guide](https://archipelago.gg/tutorial/Dark%20Souls%20III/setup_en) | - | [Dark Souls III PopTracker](https://github.com/Br00ty/DS3_AP_Maptracker/releases) | - |
+| Hollow Knight | [Hollow Knight Info](https://archipelago.gg/games/Hollow%20Knight/info/en) | [Hollow Knight Setup Guide](https://archipelago.gg/tutorial/Hollow%20Knight/setup_en) | - | [Hollow Knight PopTracker](https://github.com/murnco/Hollow-Knight-Items-Only-Poptracker-Pack/releases) | - |
+| Kingdom Hearts 2 | [Kingdom Hearts 2 Info](https://archipelago.gg/games/Kingdom%20Hearts%202/info/en) | [Kingdom Hearts 2 Setup Guide](https://archipelago.gg/tutorial/Kingdom%20Hearts%202/setup_en) | - | [Kingdom Hearts 2 PopTracker](https://github.com/JDProchaska/Kingdom-Hearts-2-FM-Pop-Tracker-Pack) | - |
+| Resident Evil 2 Remake | [Resident Evil 2 Remake Info](https://github.com/FuzzyGamesOn) | [Resident Evil 2 Remake Setup Guide](https://fuzzygameson.github.io/RE2R_AP_SetupGuide/) | [Resident Evil 2 Remake APWorld](https://github.com/FuzzyGamesOn/RE2R_AP_World/releases) | - | - |
+| Ship of Harkinian (Ocarina of Time) | [Ship of Harkinian Info](https://github.com/HarbourMasters/Archipelago-SoH) | [Ship of Harkinian Setup Guide](https://github.com/HarbourMasters/Archipelago-SoH/blob/oot-soh/worlds/oot_soh/docs/guide_en.md) | [Ship of Harkinian APWorld](https://github.com/HarbourMasters/Archipelago-SoH/releases/tag/SoH_1.2.1) | - | - |
+| Stardew Valley | [Stardew Valley Info](https://archipelago.gg/games/Stardew%20Valley/info/en) | [Stardew Valley Setup Guide](https://archipelago.gg/tutorial/Stardew%20Valley/setup_en) | - | [Stardew Valley PopTracker](https://github.com/TreySpyre/Stardew-Valley-AP-Poptracker/releases) | - |
+| XCOM 2 War of the Chosen | [XCOM 2 War of the Chosen Info](https://github.com/MaxReinstadler/X2WOTCArchipelago/blob/main/worlds/x2wotc/docs/en_XCOM%202%20War%20of%20the%20Chosen.md) | [XCOM 2 War of the Chosen Setup Guide](https://github.com/MaxReinstadler/X2WOTCArchipelago/blob/main/worlds/x2wotc/docs/setup_en.md) | [XCOM 2 War of the Chosen APWorld](https://github.com/MaxReinstadler/X2WOTCArchipelago/releases) | - | - |

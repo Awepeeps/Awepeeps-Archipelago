@@ -1,0 +1,88 @@
+{
+    "DiscordConfig": {
+        "DiscordToken": "",
+        "DiscordBroadcastChannel": "",
+        "DiscordAlertUserID": "",
+        "DiscordDebugChannel": "",
+        "AnnounceConnection": false
+    },
+    "CommandConfig": {
+        "PrefixCommandsEnabled": true,
+        "SlashCommandsEnabled": true
+    },
+    "NotificationConfig": {
+        "ItemMentionsEnabled": false,
+        "HintMessage": "💡 {receiver}'s **{item}** is at **{location}** in **{finder}'s world**. ({status}){entrance}",
+        "ConnectionUnavailableMessage": "💤 The Archipelago room may be asleep. Open {room_url} to wake it up.",
+        "ConnectionRestoredMessage": "☀️ The Archipelago room is reachable again at **{server_address}**."
+    },
+    "DailyPostConfig": {
+        "Enabled": false,
+        "Time": "00:00",
+        "Timezone": "America/New_York",
+        "DeathLinkSlots": null
+    },
+    "ArchipelagoConfig": {
+        "ArchipelagoServer": "wss://archipelago.gg",
+        "ArchipelagoPort": 0,
+        "ArchipelagoPassword": "<your_archipelago_password>",
+        "ArchipelagoBotSlot": "Bridgeipelago",
+        "ExpectedSeedName": "<seed_name_from_your_seed>",
+        "ArchipelagoTrackerURL": "https://archipelago.gg/tracker/<room-id>",
+        "ArchipelagoServerURL": "https://archipelago.gg/room/<room-id>",
+        "UniqueID": "<room-id>"
+    },
+    "ItemFilterConfig": {
+        "BotItemSpoilTraps": false,
+        "BotItemFilterLevel": 2
+    },
+    "RelayConfig": {
+        "HintMessages": true,
+        "ChatMessages": true,
+        "ServerChatMessages": true,
+        "GoalMessages": true,
+        "ReleaseMessages": true,
+        "CollectMessages": true,
+        "CountdownMessages": true,
+        "DeathlinkMessages": true,
+        "SendOwnSlotMessages": false,
+        "APClientHelp": false,
+        "APClientLicense": false,
+        "APClientCountdown": false,
+        "APClientOptions": false,
+        "APClientAdmin": false,
+        "APClientPlayers": false,
+        "APClientStatus": false,
+        "APClientRelease": false,
+        "APClientCollect": false,
+        "APClientRemaining": false,
+        "APClientMissing": false,
+        "APClientChecked": false,
+        "APClientAlias": false,
+        "APClientGetItem": false,
+        "APClientHint": false,
+        "APClientHintLocation": false,
+        "APClientVideo": false
+    },
+    "DrawbridgeConfig": {
+        "DiscordBridgeEnabled": false
+    },
+    "MetaConfig": {
+        "FlavorDeathlink": false,
+        "DeathlinkLottery": false,
+        "LanguageFile": "en"
+    },
+    "AdvancedConfig": {
+        "LoggingDirectory": "/logs/",
+        "PlayerRegistrationDirectory": "/RegistrationData/",
+        "PlayerItemQueueDirectory": "/ItemQueue/",
+        "ArchipelagoDataDirectory": "/ArchData/",
+        "QueueOverclock": 1,
+        "SnoozeCompletedGames": true,
+        "JoinMessage": "<custom join message here>",
+        "DebugMode": false,
+        "DiscordJoinOnly": false,
+        "SelfHostNoWeb": false,
+        "CycleDiscord": 0
+    }
+}
